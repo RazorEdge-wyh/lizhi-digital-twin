@@ -374,36 +374,43 @@ export function Workspace({ onExit, active }: Props) {
         </span>
 
         <span className="menubar__center">
-          <span className="menubar__doc">
-            <span className="menubar__doc-name">{projectName}</span>
-            <span className="menubar__doc-path" translate="no">
-              /scenes/lizhi/{floor.id}.scene
+          <LiquidGlass className="menubar__pill" radius="sm" tone="regular" refraction={0} over elevation={0}>
+            <span className="menubar__doc">
+              <span className="menubar__doc-name">{projectName}</span>
+              <span className="menubar__doc-path" translate="no">
+                /scenes/lizhi/{floor.id}.scene
+              </span>
             </span>
-          </span>
-          <span className="tag" title="上次保存时间">
-            保存 {savedAt}
-          </span>
-          {sim.alerts > 0 && (
-            <span className="tag tag--alert">
-              <i className="dot" /> {sim.alerts}
+          </LiquidGlass>
+
+          <LiquidGlass className="menubar__pill" radius="sm" tone="regular" refraction={0} over elevation={0}>
+            <span className="tag" title="上次保存时间">
+              保存 {savedAt}
             </span>
-          )}
+            {sim.alerts > 0 && (
+              <span className="tag tag--alert">
+                <i className="dot" /> {sim.alerts}
+              </span>
+            )}
+          </LiquidGlass>
         </span>
 
         <span className="menubar__right">
-          <button
-            className={`tbtn ${paused ? "tbtn--on" : ""}`}
-            onClick={() => setPaused((v) => !v)}
-            aria-pressed={paused}
-          >
-            {paused ? "已暂停" : "实时"}
-          </button>
-          <button className="tbtn" onClick={saveProject}>
-            保存
-          </button>
-          <button className="tbtn" onClick={onExit} title="返回入口页 (Esc)">
-            退出
-          </button>
+          <LiquidGlass className="menubar__actions" radius="sm" tone="regular" refraction={0} over elevation={0}>
+            <button
+              className={`tbtn ${paused ? "tbtn--on" : ""}`}
+              onClick={() => setPaused((v) => !v)}
+              aria-pressed={paused}
+            >
+              {paused ? "已暂停" : "实时"}
+            </button>
+            <button className="tbtn" onClick={saveProject}>
+              保存
+            </button>
+            <button className="tbtn" onClick={onExit} title="返回入口页 (Esc)">
+              退出
+            </button>
+          </LiquidGlass>
         </span>
       </LiquidGlass>
 

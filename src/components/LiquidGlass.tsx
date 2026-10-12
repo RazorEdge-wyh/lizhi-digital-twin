@@ -51,6 +51,14 @@ export interface LiquidGlassProps extends HTMLAttributes<HTMLDivElement> {
   refraction?: number;
   /** Backdrop blur in px. */
   blur?: number;
+  /**
+   * Set when this pane sits on top of another glass pane. Nested
+   * `backdrop-filter` does not sample what the parent already filtered the way
+   * a flat stack does, so a blurred child goes muddy. In this mode the pane
+   * keeps the tint, edge and rim — the parts that read as glass — and drops the
+   * blur, which keeps every surface legibly glassy without turning to soup.
+   */
+  over?: boolean;
   /** Elevation shadow strength. */
   elevation?: 0 | 1 | 2;
   /** Let the content wrapper stretch to the full pane height. */
@@ -147,6 +155,7 @@ export const LiquidGlass = forwardRef<HTMLDivElement, LiquidGlassProps>(function
     tone = "regular",
     refraction = 1,
     blur = 20,
+    over = false,
     elevation = 1,
     fill = false,
     className,
@@ -202,9 +211,11 @@ export const LiquidGlass = forwardRef<HTMLDivElement, LiquidGlassProps>(function
   // The SDF pass already scales its offsets, so a refracted edge needs no extra
   // filter blur; a large `blur()` here would smear the very edge it produces.
   const lift = tone === "frost" ? " brightness(1.22)" : "";
-  const backdrop = map
-    ? `url(#${filterId}) saturate(180%)${lift}`
-    : `blur(${blur}px) saturate(180%)${lift}`;
+  const backdrop = over
+    ? "none"
+    : map
+      ? `url(#${filterId}) saturate(180%)${lift}`
+      : `blur(${blur}px) saturate(180%)${lift}`;
 
   const cssVars = {
     "--lg-radius": `${px}px`,
@@ -222,6 +233,7 @@ export const LiquidGlass = forwardRef<HTMLDivElement, LiquidGlassProps>(function
         `lg--r-${radius}`,
         `lg--e${elevation}`,
         `lg--tone-${tone}`,
+        over ? "lg--over" : "",
         fill ? "lg--fill" : "",
         className ?? "",
       ]

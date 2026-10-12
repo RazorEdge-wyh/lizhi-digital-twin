@@ -249,6 +249,56 @@ button {
   background: var(--hairline-soft);
 }
 
+/* --- over: glass stacked on glass ----------------------------------------
+   A nested `backdrop-filter` cannot sample what its parent already filtered,
+   so a blurred child turns muddy. On this tier the blur is dropped and only the
+   material body, edge and rim are kept — visually identical family, still
+   legible, none of the mush. */
+.lg--over .lg__body {
+  background: var(--lg-wash, rgba(255, 255, 255, 0.08));
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.lg--over .lg__body::after {
+  border-top-color: rgba(255, 255, 255, 0.14);
+  box-shadow: none;
+}
+/* a rim on all four sides reads as a pane resting on another pane */
+.lg--over::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* --- menubar: commands sit on their own small panes ---------------------- */
+.menubar {
+  gap: 10px;
+}
+.menubar__menus {
+  gap: 4px;
+}
+.menubar__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px 2px 4px;
+  min-width: 0;
+}
+.menubar__pill .tag {
+  height: 18px;
+}
+.menubar__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.menubar__actions .tbtn {
+  padding: 0 10px;
+}
+
 /* ==========================================================================
    Shared micro-components
    ========================================================================= */
@@ -436,334 +486,153 @@ button {
 }
 
 /* Scrim weighted to the left, where the type sits, and much lighter on the
-   right so the footage is not washed out. One layer only. */
+   right so the footage is not washed out. One layer only. Without glass under
+   the type it has to do the whole job of holding white text. */
 .landing__scrim {
   position: absolute;
   inset: 0;
   background:
     linear-gradient(
       96deg,
-      rgba(3, 6, 12, 0.88) 0%,
-      rgba(3, 7, 14, 0.6) 30%,
-      rgba(4, 8, 16, 0.08) 56%,
-      rgba(4, 8, 16, 0.04) 78%,
-      rgba(4, 8, 16, 0.4) 100%
+      rgba(3, 6, 12, 0.9) 0%,
+      rgba(3, 7, 14, 0.66) 32%,
+      rgba(4, 8, 16, 0.12) 58%,
+      rgba(4, 8, 16, 0.05) 80%,
+      rgba(4, 8, 16, 0.34) 100%
     ),
-    radial-gradient(74% 64% at 20% 48%, rgba(3, 6, 12, 0.72), rgba(3, 6, 12, 0) 74%),
+    radial-gradient(70% 76% at 16% 52%, rgba(3, 6, 12, 0.78), rgba(3, 6, 12, 0) 72%),
     linear-gradient(
       180deg,
-      rgba(4, 6, 10, 0.52) 0%,
-      rgba(4, 6, 10, 0.05) 26%,
-      rgba(4, 6, 10, 0.1) 62%,
-      rgba(3, 6, 12, 0.7) 100%
+      rgba(4, 6, 10, 0.5) 0%,
+      rgba(4, 6, 10, 0.04) 24%,
+      rgba(4, 6, 10, 0.08) 64%,
+      rgba(3, 6, 12, 0.72) 100%
     );
 }
 
-/* --- landing: editorial column, left aligned ----------------------------- */
+/* --- landing: one word, one action --------------------------------------- */
 .landing__content {
   position: relative;
   z-index: 1;
-  /* min() keeps the column inside the viewport once the left margin grows, and
-     box-sizing keeps the margin from creating horizontal overflow */
   width: min(820px, calc(100vw - clamp(24px, 14vw, 280px)));
   box-sizing: border-box;
   margin-left: clamp(24px, 7vw, 140px);
   display: flex;
   flex-direction: column;
-  gap: clamp(16px, 2.4vh, 26px);
+  align-items: flex-start;
+  gap: clamp(14px, 2.2vh, 22px);
 }
 
-.eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 11px;
-  letter-spacing: 0.34em;
-  text-transform: uppercase;
-  color: rgba(198, 220, 240, 0.8);
-  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.7);
-}
-.eyebrow__rule {
-  width: clamp(26px, 3.4vw, 54px);
-  height: 1px;
-  flex: none;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0));
-}
-.eyebrow__cn {
-  font-family: var(--font-cn);
-  letter-spacing: 0.28em;
-  font-size: 12px;
-  color: rgba(224, 238, 250, 0.92);
-}
-.eyebrow__en {
-  color: rgba(180, 200, 220, 0.7);
-}
-
-.hero {
+/* Everything that is not the action lives here: two short lines, small type. */
+.landing__kicker {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-}
-.hero__title {
+  gap: 3px;
   margin: 0;
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 4px 18px;
-}
-.hero__title-cn {
-  position: relative;
-  font-family: var(--font-cn);
-  font-weight: 800;
-  font-size: clamp(46px, 7.4vw, 100px);
-  line-height: 1;
-  letter-spacing: 0.06em;
-  /* near-white with a cool vertical grade — presence without neon */
-  background: linear-gradient(176deg, #ffffff 4%, #eef5fc 26%, #cfe1f2 56%, #ffffff 84%, #dbe8f5 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  -webkit-text-stroke: 0.5px rgba(255, 255, 255, 0.22);
-  filter: drop-shadow(0 4px 28px rgba(0, 0, 0, 0.6));
-}
-/* the engineering rule under the Chinese title */
-.hero__title-cn::after {
-  content: "";
-  position: absolute;
-  left: 0.06em;
-  right: 34%;
-  bottom: -0.08em;
-  height: 2px;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.85), rgba(150, 190, 225, 0.35) 46%, transparent);
-  opacity: 0.8;
-}
-.hero__title-en {
-  font-size: clamp(14px, 1.4vw, 20px);
-  font-weight: 600;
+  font-size: 10.5px;
   letter-spacing: 0.32em;
   text-transform: uppercase;
-  color: rgba(228, 240, 252, 0.9);
-  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.72);
+  color: rgba(214, 230, 246, 0.82);
+  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.8);
 }
-
-/* who the building is for */
-.hero__faculty {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin: 0;
+.landing__kicker-sub {
   font-family: var(--font-cn);
-  font-size: clamp(12px, 1.05vw, 13.5px);
-  letter-spacing: 0.14em;
-  color: rgba(232, 240, 250, 0.9);
-  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.7);
-}
-.hero__faculty-en {
-  font-family: var(--font-ui);
-  font-size: clamp(9.5px, 0.7vw, 10.5px);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(190, 208, 228, 0.6);
-}
-
-.hero__lede {
-  max-width: 58ch;
-  margin: 2px 0 0;
-  font-family: var(--font-cn);
-  font-size: 13px;
-  line-height: 1.85;
-  color: rgba(206, 222, 238, 0.78);
-  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.72);
-  text-wrap: pretty;
-}
-.hero__lede-en {
-  display: block;
-  margin-top: 5px;
-  font-family: var(--font-ui);
-  font-size: 11.5px;
-  letter-spacing: 0.05em;
-  color: rgba(168, 190, 212, 0.64);
-}
-
-/* live figures — one pane of glass each, no gradient body */
-.specs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.spec {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  padding: 8px 13px;
-  border-radius: 11px;
-  border: 1px solid var(--hairline);
-  background: rgba(255, 255, 255, 0.055);
-  -webkit-backdrop-filter: blur(14px) saturate(160%);
-  backdrop-filter: blur(14px) saturate(160%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
-}
-.spec svg {
-  color: var(--ink-3);
-}
-.spec__v {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: 14px;
-  color: #fff;
-}
-.spec__k {
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--ink-3);
-}
-
-/* --- the one control ----------------------------------------------------- */
-.startrow {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  flex-wrap: wrap;
-  margin-top: 2px;
-}
-.enter {
-  display: inline-flex;
-  align-items: stretch;
-  justify-content: center;
-  min-height: 66px;
-  padding: 0;
-  border: none;
-  border-radius: 33px;
-  background: transparent;
-  color: var(--ink-0);
-  transition: transform var(--dur-fast) var(--ease);
-}
-/* The pane carries the control's box: padding lives here so the glass is the
-   full size of the button rather than sizing to its label. */
-.enter .lg {
-  flex: 1 1 auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 33px;
-}
-/* A full-perimeter hairline reads as a surface edge rather than a glow, which
-   is what tells the eye this is a control and not part of the footage. */
-.enter .lg::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  border: 1px solid rgba(255, 255, 255, 0.44);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
-}
-.enter__inner {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 0 clamp(22px, 3vw, 30px);
-}
-.enter__glyph {
-  position: relative;
-  width: 40px;
-  height: 40px;
-  flex: none;
-  border-radius: 12px;
-  display: grid;
-  place-items: center;
-  background: rgba(255, 255, 255, 0.22);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
-  color: #fff;
-}
-.enter__label {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 1px;
-}
-.enter__cn {
-  font-family: var(--font-cn);
-  font-size: clamp(19px, 1.7vw, 22px);
-  font-weight: 600;
+  font-size: 12px;
   letter-spacing: 0.2em;
+  text-transform: none;
+  color: rgba(190, 210, 230, 0.66);
+}
+
+/* --- the action: plain type, no material --------------------------------- */
+.startlink {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 6px 2px 10px;
+  border: none;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.startlink__text {
+  font-family: var(--font-cn);
+  font-weight: 800;
+  font-size: clamp(58px, 8.4vw, 116px);
+  line-height: 1.04;
+  letter-spacing: 0.06em;
   color: #fff;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
-}
-.enter__en {
-  font-size: 10px;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.84);
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.42);
-}
-.enter__chev {
-  color: rgba(255, 255, 255, 0.78);
+  text-shadow: 0 6px 40px rgba(0, 0, 0, 0.62);
   transition: transform var(--dur) var(--ease);
 }
+/* the hover affordance: a rule that draws itself in from the left */
+.startlink__rule {
+  display: block;
+  width: 100%;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.92);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 320ms var(--ease);
+}
 @media (hover: hover) {
-  .enter:hover {
-    transform: translateY(-1px);
+  .startlink:hover .startlink__rule {
+    transform: scaleX(1);
   }
-  .enter:hover .lg {
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.55),
-      0 18px 40px -16px rgba(0, 0, 0, 0.72);
-  }
-  .enter:hover .lg::after {
-    border-color: rgba(255, 255, 255, 0.6);
-  }
-  .enter:hover .enter__chev {
-    transform: translateX(3px);
+  .startlink:hover .startlink__text {
+    transform: translateX(4px);
   }
 }
-.enter:active {
-  transform: scale(0.96);
+/* keyboard users get the same affordance, and it is never only colour */
+.startlink:focus-visible {
+  outline: none;
 }
-
-.startrow__hint {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  font-size: 11px;
-  letter-spacing: 0.04em;
-  color: var(--ink-3);
-  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.7);
+.startlink:focus-visible .startlink__rule {
+  transform: scaleX(1);
 }
-.startrow__hint b {
-  color: var(--ink-0);
-  font-family: var(--font-cn);
-  font-weight: 500;
-  letter-spacing: 0.06em;
+.startlink:active .startlink__text {
+  transform: scale(0.985);
 }
 
-/* --- footer -------------------------------------------------------------- */
+/* --- footer: the condensed details, out of the way ----------------------- */
 .landing__footer {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
   z-index: 2;
+  box-sizing: border-box;
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 20px;
-  padding: 16px clamp(20px, 3vw, 40px);
-  padding-bottom: max(16px, env(safe-area-inset-bottom));
-  font-size: 10.5px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(150, 172, 196, 0.66);
-  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.72);
+  gap: 16px;
+  padding: 14px clamp(20px, 3vw, 40px);
+  padding-bottom: max(14px, env(safe-area-inset-bottom));
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: rgba(158, 180, 204, 0.72);
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.8);
+}
+.landing__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+}
+.landing__meta-sep {
+  font-style: normal;
+  color: rgba(158, 180, 204, 0.4);
 }
 .landing__coords {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.04em;
-  text-transform: none;
-  color: rgba(160, 184, 208, 0.7);
+  white-space: nowrap;
+  color: rgba(168, 190, 212, 0.72);
 }
 
 /* ==========================================================================
@@ -1127,8 +996,56 @@ button {
   color: var(--ink-2);
 }
 
-/* --- viewport ------------------------------------------------------------ */
-.viewport {
+/* --- hierarchy readout: selected floor's key figures, as glass cells ------ */
+.panel__body--readout {
+  flex: none;
+  padding: 8px;
+}
+.readout__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 7px;
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  color: var(--ink-4);
+}
+.readout__cells {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+.rcell {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+  padding: 7px 8px;
+  min-width: 0;
+}
+.rcell__k {
+  font-size: 9.5px;
+  color: var(--ink-4);
+  white-space: nowrap;
+}
+.rcell__v {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  color: var(--ink-0);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rcell__v i {
+  font-style: normal;
+  font-size: 9px;
+  color: var(--ink-4);
+  margin-left: 2px;
+}
+
+/* --- viewport ------------------------------------------------------------ */.viewport {
   flex: 1;
   min-height: 0;
   border-radius: 14px;
@@ -1522,9 +1439,9 @@ button {
 .monitor__stats {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0;
+  gap: 6px;
   flex: none;
-  border-top: 1px solid var(--hairline-soft);
+  padding: 8px;
 }
 .mstat {
   display: flex;
@@ -1532,10 +1449,7 @@ button {
   justify-content: space-between;
   gap: 8px;
   padding: 7px 9px;
-  border-bottom: 1px solid var(--hairline-soft);
-}
-.mstat:nth-child(odd) {
-  border-right: 1px solid var(--hairline-soft);
+  min-width: 0;
 }
 .mstat__k {
   font-family: var(--font-cn);
@@ -1553,45 +1467,39 @@ button {
   color: var(--warn);
 }
 
-/* --- status bar ---------------------------------------------------------- */
+/* --- status bar: the console floor (one glass pane per cell) -------------- */
 .statusbar {
-  border-radius: 14px;
-  overflow: hidden;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: repeat(8, minmax(0, 1fr)) auto;
+  gap: 6px;
+  min-height: 0;
 }
-.statusbar > .lg__content {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: stretch;
-}
-.statusbar__tiles {
-  display: grid;
-  grid-template-columns: repeat(8, minmax(0, 1fr));
+.stile,
+.total {
   min-width: 0;
+  padding: 0;
 }
-.stile {
+/* the whole tile is the hit area, so the button fills the pane */
+.stile__hit {
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
   gap: 4px;
   padding: 8px 10px 9px;
   border: none;
-  border-right: 1px solid var(--hairline-soft);
+  border-radius: inherit;
   background: transparent;
   text-align: left;
-  min-width: 0;
   transition: background var(--dur) var(--ease);
 }
-.stile:last-child {
-  border-right: none;
-}
 @media (hover: hover) {
-  .stile:hover {
-    background: rgba(255, 255, 255, 0.04);
+  .stile__hit:hover {
+    background: rgba(255, 255, 255, 0.07);
   }
 }
 .stile--on {
-  background: rgba(255, 255, 255, 0.075);
+  --lg-wash: rgba(255, 255, 255, 0.18);
 }
 .stile__top {
   display: flex;
@@ -1648,21 +1556,13 @@ button {
 .metric__v--alert {
   color: var(--alert);
 }
-.statusbar__totals {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(104px, auto));
-  border-left: 1px solid var(--hairline-soft);
-}
+/* the four whole-building figures sit in their own panes, slightly lighter */
 .total {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 1px;
   padding: 8px 13px;
-  border-right: 1px solid var(--hairline-soft);
-  min-width: 0;
-}
-.total:last-child {
-  border-right: none;
 }
 .total__k {
   font-size: 9.5px;
@@ -1885,14 +1785,9 @@ button {
   .ws__middle {
     grid-template-columns: 228px minmax(0, 1fr) 292px;
   }
-  .statusbar__tiles {
+  /* eight glass tiles get too narrow to read: two rows of four */
+  .statusbar {
     grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-  .stile:nth-child(4n) {
-    border-right: none;
-  }
-  .stile:nth-child(-n + 4) {
-    border-bottom: 1px solid var(--hairline-soft);
   }
 }
 @media (max-width: 1180px) {
@@ -1902,103 +1797,53 @@ button {
   .ws__right {
     display: none;
   }
-  .statusbar__totals {
-    grid-template-columns: repeat(2, minmax(104px, auto));
-  }
-  .total:nth-child(2n) {
-    border-right: none;
-  }
-  .total:nth-child(-n + 2) {
-    border-bottom: 1px solid var(--hairline-soft);
-  }
 }
 @media (max-width: 700px) {
   .landing__content {
-    gap: 14px;
+    gap: 12px;
     margin: 0 18px;
     width: calc(100vw - 36px);
     max-width: none;
-    padding-bottom: 64px;
+    padding-bottom: 78px;
   }
-  /* the display title and its English label stack instead of colliding */
-  .hero__title {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+  .landing__kicker {
+    font-size: 9.5px;
+    letter-spacing: 0.24em;
   }
-  .hero__title-cn {
-    font-size: clamp(40px, 13vw, 60px);
-  }
-  .hero__title-en {
+  .landing__kicker-sub {
     font-size: 11px;
-    letter-spacing: 0.26em;
+    letter-spacing: 0.16em;
   }
-  .hero__lede {
-    font-size: 12px;
-    line-height: 1.7;
-  }
-  .hero__lede-en {
-    display: none;
-  }
-  .hero__faculty-en {
-    font-size: 9px;
-    line-height: 1.5;
-  }
-  /* the control takes the full width so its label never crowds the hint */
-  .startrow {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-  }
-  .enter {
-    width: 100%;
-    min-height: 62px;
-  }
-  .enter__inner {
-    flex: 1 1 auto;
-    width: 100%;
-    /* centred so the glyph/label/chevron group sits as one unit */
-    justify-content: center;
-    gap: 12px;
-    padding: 0 14px;
-  }
-  .enter__label {
-    text-align: left;
-  }
-  .enter__chev {
-    flex: none;
-  }
-  .enter__cn {
-    font-size: 18px;
-    letter-spacing: 0.12em;
-  }
-  .startrow__hint {
-    font-size: 10px;
+  .startlink__text {
+    font-size: clamp(46px, 15vw, 72px);
+    letter-spacing: 0.04em;
   }
   /* the footer is absolutely positioned, so it needs its own box-sizing guard */
   .landing__footer {
     flex-direction: column;
     align-items: flex-start;
-    gap: 4px;
+    gap: 5px;
     width: 100%;
     box-sizing: border-box;
     padding: 12px 18px;
     padding-bottom: max(12px, env(safe-area-inset-bottom));
     font-size: 9px;
-    letter-spacing: 0.08em;
-    text-transform: none;
+    letter-spacing: 0.06em;
+  }
+  .landing__coords {
+    white-space: normal;
   }
   .landing__scrim {
     /* one vertical grade instead of the left-weighted one: on a phone the type
        spans the full width, so it needs an even wash rather than a left ramp */
     background:
-      radial-gradient(120% 70% at 50% 42%, rgba(3, 6, 12, 0.62), rgba(3, 6, 12, 0.2) 70%),
+      radial-gradient(120% 70% at 50% 42%, rgba(3, 6, 12, 0.66), rgba(3, 6, 12, 0.22) 70%),
       linear-gradient(
         180deg,
-        rgba(3, 6, 12, 0.72) 0%,
-        rgba(3, 6, 12, 0.42) 34%,
-        rgba(3, 6, 12, 0.5) 70%,
-        rgba(3, 6, 12, 0.86) 100%
+        rgba(3, 6, 12, 0.74) 0%,
+        rgba(3, 6, 12, 0.44) 34%,
+        rgba(3, 6, 12, 0.52) 70%,
+        rgba(3, 6, 12, 0.88) 100%
       );
   }
 }
@@ -2014,20 +1859,6 @@ button {
     display: none;
   }
   .statusbar {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .statusbar > .lg__content {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .statusbar__tiles {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .stile:nth-child(2n) {
-    border-right: none;
-  }
-  .statusbar__totals {
-    border-left: none;
-    border-top: 1px solid var(--hairline-soft);
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .panel__en,

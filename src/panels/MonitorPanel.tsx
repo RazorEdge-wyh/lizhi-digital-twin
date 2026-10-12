@@ -312,26 +312,17 @@ export function MonitorPanel({ floorCode, floorLabel, reading, history, paused, 
       </div>
 
       <div className="monitor__stats">
-        <div className="mstat">
-          <span className="mstat__k">在场人数</span>
-          <span className="mstat__v">{reading?.people ?? "—"}</span>
-        </div>
-        <div className="mstat">
-          <span className="mstat__k">CO₂</span>
-          <span className={`mstat__v ${(reading?.co2 ?? 0) > 1000 ? "mstat__v--warn" : ""}`}>
-            {reading?.co2 ?? "—"}
-          </span>
-        </div>
-        <div className="mstat">
-          <span className="mstat__k">负荷</span>
-          <span className="mstat__v">{reading ? reading.power.toFixed(1) : "—"}</span>
-        </div>
-        <div className="mstat">
-          <span className="mstat__k">在线点位</span>
-          <span className="mstat__v">
-            {reading?.online ?? 0}/{reading?.devices ?? 0}
-          </span>
-        </div>
+        {[
+          { k: "在场人数", v: String(reading?.people ?? "—"), warn: false },
+          { k: "CO₂", v: String(reading?.co2 ?? "—"), warn: (reading?.co2 ?? 0) > 1000 },
+          { k: "负荷", v: reading ? reading.power.toFixed(1) : "—", warn: false },
+          { k: "在线点位", v: `${reading?.online ?? 0}/${reading?.devices ?? 0}`, warn: false },
+        ].map((s) => (
+          <LiquidGlass key={s.k} className="mstat" radius="sm" tone="regular" refraction={0} over elevation={0} fill>
+            <span className="mstat__k">{s.k}</span>
+            <span className={`mstat__v ${s.warn ? "mstat__v--warn" : ""}`}>{s.v}</span>
+          </LiquidGlass>
+        ))}
       </div>
     </LiquidGlass>
   );

@@ -148,25 +148,23 @@ export function HierarchyPanel({ selectedFloor, onSelectFloor, expanded, onToggl
         </div>
       </div>
 
-      {/* the selected floor's headline readings, one hairline from the tree */}
-      <div className="panel__body" style={{ flex: "none", padding: "7px 10px" }}>
-        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10 }}>
-          <span style={{ fontSize: 10.5, color: "var(--ink-4)", letterSpacing: "0.08em" }}>
-            {floor.code} · {floor.en}
-          </span>
-          <span className="num" style={{ fontSize: 11, color: "var(--ink-2)" }}>
+      {/* the selected floor's headline readings, as their own glass cells */}
+      <div className="panel__body panel__body--readout">
+        <div className="readout__head">
+          <span>{floor.code} · {floor.en}</span>
+          <span className="num">
             {reading?.online ?? 0}/{reading?.devices ?? 0} 在线
           </span>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0,1fr))", gap: 4, marginTop: 6 }}>
+        <div className="readout__cells">
           {DEVICE_TYPES.slice(0, 3).map((d) => (
-            <div key={d.id} style={{ display: "flex", flexDirection: "column", gap: 1, minWidth: 0 }}>
-              <span style={{ fontSize: 9.5, color: "var(--ink-4)" }}>{d.cn}</span>
-              <span className="num" style={{ fontSize: 13, color: "var(--ink-0)" }}>
+            <LiquidGlass key={d.id} className="rcell" radius="sm" tone="regular" refraction={0} over elevation={0} fill>
+              <span className="rcell__k">{d.cn}</span>
+              <span className="rcell__v">
                 {reading ? Number(reading[d.source]).toFixed(d.id === "people" ? 0 : 1) : "—"}
-                <span style={{ fontSize: 9.5, color: "var(--ink-4)", marginLeft: 2 }}>{d.unit}</span>
+                <i>{d.unit}</i>
               </span>
-            </div>
+            </LiquidGlass>
           ))}
         </div>
       </div>

@@ -10,14 +10,14 @@ interface Props {
 
 type Level = "ok" | "warn" | "alert";
 
-const over = (v: number, warn: number, alert: number): Level => (v > alert ? "alert" : v > warn ? "warn" : "ok");
+const over_ = (v: number, warn: number, alert: number): Level => (v > alert ? "alert" : v > warn ? "warn" : "ok");
 const cls = (l: Level) => (l === "alert" ? "metric__v--alert" : l === "warn" ? "metric__v--warn" : "metric__v--ok");
 const tone = (s?: string) => (s === "alert" ? "var(--alert)" : s === "warn" ? "var(--warn)" : "var(--ok)");
 
 /**
- * Bottom status: one column per floor (the requested per-floor sensor state)
- * and a compact whole-building summary. Separators are hairlines; nothing here
- * carries a shadow, a glow or a gradient.
+ * Bottom status: one glass tile per floor (the requested per-floor sensor state)
+ * and a compact whole-building summary, every cell its own pane. The tiles are
+ * `over` glass because they sit inside the bar's own material.
  */
 export function StatusBar({ sim, selectedFloor, onSelectFloor }: Props) {
   const occupied = FLOORS.reduce((n, f) => n + (sim.readings[f.id]?.people ?? 0), 0);
@@ -26,15 +26,23 @@ export function StatusBar({ sim, selectedFloor, onSelectFloor }: Props) {
   const avgCo2 = FLOORS.reduce((n, f) => n + (sim.readings[f.id]?.co2 ?? 0), 0) / Math.max(1, FLOORS.length);
 
   return (
-    <LiquidGlass className="statusbar" radius="lg" tone="thick" refraction={0.6} blur={20} elevation={1} fill>
-      <div className="statusbar__tiles">
-        {FLOORS.map((f) => {
-          const r: SensorReading | undefined = sim.readings[f.id];
-          const on = f.id === selectedFloor;
-          return (
+    <div className="statusbar" role="group" aria-label="各楼层传感器状态">
+      {FLOORS.map((f) => {
+        const r: SensorReading | undefined = sim.readings[f.id];
+        const on = f.id === selectedFloor;
+        return (
+          <LiquidGlass
+            key={f.id}
+            className={`stile ${on ? "stile--on" : ""}`}
+            radius="md"
+            tone="regular"
+            refraction={0}
+            over
+            elevation={0}
+            fill
+          >
             <button
-              key={f.id}
-              className={`stile ${on ? "stile--on" : ""}`}
+              className="stile__hit"
               onClick={() => onSelectFloor(f.id)}
               aria-current={on}
               title={`${f.code} ${f.label} · ${f.en} · ${f.function}`}
@@ -47,17 +55,17 @@ export function StatusBar({ sim, selectedFloor, onSelectFloor }: Props) {
               <span className="stile__metrics">
                 <span className="metric">
                   <span className="metric__k">温度</span>
-                  <span className={`metric__v ${cls(over(r?.temp ?? 0, 25.6, 27.5))}`}>
+                  <span className={`metric__v ${cls(over_(r?.temp ?? 0, 25.6, 27.5))}`}>
                     {r ? r.temp.toFixed(1) : "—"}
                   </span>
                 </span>
                 <span className="metric">
                   <span className="metric__k">湿度</span>
-                  <span className={`metric__v ${cls(over(r?.rh ?? 0, 60, 66))}`}>{r ? r.rh.toFixed(0) : "—"}</span>
+                  <span className={`metric__v ${cls(over_(r?.rh ?? 0, 60, 66))}`}>{r ? r.rh.toFixed(0) : "—"}</span>
                 </span>
                 <span className="metric">
                   <span className="metric__k">CO₂</span>
-                  <span className={`metric__v ${cls(over(r?.co2 ?? 0, 880, 1050))}`}>{r?.co2 ?? "—"}</span>
+                  <span className={`metric__v ${cls(over_(r?.co2 ?? 0, 880, 1050))}`}>{r?.co2 ?? "—"}</span>
                 </span>
                 <span className="metric">
                   <span className="metric__k">人数</span>
@@ -75,46 +83,40 @@ export function StatusBar({ sim, selectedFloor, onSelectFloor }: Props) {
                 </span>
               </span>
             </button>
-          );
-        })}
-      </div>
+          </LiquidGlass>
+        );
+      })}
 
-      <div className="statusbar__totals">
-        <div className="total">
-          <span className="total__k">全楼负荷</span>
+      {[
+        {
+          k: "全楼负荷",
+          v: sim.load.toFixed(1),
+          u: "kW",
+          note: sim.load > 900 ? "峰值区间" : "平稳运行",
+        },
+        { k: "在场人数", v: String(occupied), u: `/ ${capacity}`, note: `${FLOORS.length} 层汇总` },
+        {
+          k: "点位在线",
+          v: onlineRate.toFixed(1),
+          u: "%",
+          note: `${sim.online}/${sim.devices} 端点`,
+        },
+        {
+          k: "平均 CO₂",
+          v: String(Math.round(avgCo2)),
+          u: "ppm",
+          note: avgCo2 > 880 ? "需加强新风" : "新风充足",
+        },
+      ].map((t) => (
+        <LiquidGlass key={t.k} className="total" radius="md" tone="thin" refraction={0} over elevation={0} fill>
+          <span className="total__k">{t.k}</span>
           <span className="total__v">
-            {sim.load.toFixed(1)}
-            <i className="total__u">kW</i>
+            {t.v}
+            <i className="total__u">{t.u}</i>
           </span>
-          <span className="total__note">{sim.load > 900 ? "峰值区间" : "平稳运行"}</span>
-        </div>
-        <div className="total">
-          <span className="total__k">在场人数</span>
-          <span className="total__v">
-            {occupied}
-            <i className="total__u">/ {capacity}</i>
-          </span>
-          <span className="total__note">{FLOORS.length} 层汇总</span>
-        </div>
-        <div className="total">
-          <span className="total__k">点位在线</span>
-          <span className="total__v">
-            {onlineRate.toFixed(1)}
-            <i className="total__u">%</i>
-          </span>
-          <span className="total__note">
-            {sim.online}/{sim.devices} 端点
-          </span>
-        </div>
-        <div className="total">
-          <span className="total__k">平均 CO₂</span>
-          <span className="total__v">
-            {Math.round(avgCo2)}
-            <i className="total__u">ppm</i>
-          </span>
-          <span className="total__note">{avgCo2 > 880 ? "需加强新风" : "新风充足"}</span>
-        </div>
-      </div>
-    </LiquidGlass>
+          <span className="total__note">{t.note}</span>
+        </LiquidGlass>
+      ))}
+    </div>
   );
 }
