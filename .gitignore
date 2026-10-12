@@ -21,3 +21,10 @@ Thumbs.db
 # local design-reference cache (fetched guidance docs)
 .skills-ref/
 
+
+# Background media: large binaries. They belong in the repository (GitHub Pages
+# serves the built site from public/), so these are NOT ignored by default ¡ª
+# uncomment only if you keep them in object storage instead.
+# public/assets/bg.webm
+# public/assets/bg-poster.jpg
+# public/assets/bg-mobile.jpg

@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1400" preserveAspectRatio="xMidYMid slice" role="img" aria-label="立志楼夜景 移动端占位海报">
+  <!-- PLACEHOLDER portrait poster for phones. Replace this file with your own:
+       public/assets/bg-mobile.jpg  (portrait, e.g. 1080x1920)
+       The code points at  ./assets/bg-mobile.jpg . -->
+  <defs>
+    <linearGradient id="skyM" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#050810"/>
+      <stop offset="38%" stop-color="#0d1626"/>
+      <stop offset="66%" stop-color="#1e2c46"/>
+      <stop offset="82%" stop-color="#5a5566"/>
+      <stop offset="100%" stop-color="#12141c"/>
+    </linearGradient>
+    <linearGradient id="slabM" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1b2539"/>
+      <stop offset="100%" stop-color="#0c131f"/>
+    </linearGradient>
+    <radialGradient id="glowM" cx="50%" cy="90%" r="46%">
+      <stop offset="0%" stop-color="#ffd9a3" stop-opacity="0.46"/>
+      <stop offset="62%" stop-color="#ffb877" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#ffb877" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="vigM" cx="50%" cy="42%" r="70%">
+      <stop offset="52%" stop-color="#000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0.66"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="800" height="1400" fill="url(#skyM)"/>
+
+  <!-- skyline -->
+  <g fill="#0a0f1a">
+    <rect x="0" y="880" width="150" height="260"/>
+    <rect x="640" y="920" width="160" height="220"/>
+    <rect x="470" y="940" width="120" height="200"/>
+  </g>
+
+  <!-- landmark block -->
+  <rect x="120" y="700" width="560" height="420" fill="url(#slabM)"/>
+  <rect x="300" y="650" width="200" height="50" fill="#141d2e"/>
+  <rect x="80" y="1000" width="640" height="160" fill="#101827"/>
+
+  <!-- windows -->
+  <g fill="#ffd9a3" opacity="0.75">
+    <rect x="180" y="750" width="42" height="16"/><rect x="300" y="750" width="42" height="16"/>
+    <rect x="480" y="750" width="42" height="16"/><rect x="600" y="750" width="42" height="16"/>
+    <rect x="240" y="860" width="42" height="16"/><rect x="420" y="860" width="42" height="16"/>
+    <rect x="560" y="860" width="42" height="16"/><rect x="180" y="960" width="42" height="16"/>
+    <rect x="480" y="960" width="42" height="16"/>
+  </g>
+  <g fill="#bcd7f5" opacity="0.55">
+    <rect x="240" y="750" width="42" height="16"/><rect x="420" y="750" width="42" height="16"/>
+    <rect x="180" y="860" width="42" height="16"/><rect x="360" y="860" width="42" height="16"/>
+    <rect x="600" y="860" width="42" height="16"/><rect x="300" y="960" width="42" height="16"/>
+  </g>
+
+  <!-- fins -->
+  <g stroke="#0b1120" stroke-width="4" opacity="0.9">
+    <path d="M200 700V1120M320 700V1120M440 700V1120M560 700V1120"/>
+  </g>
+
+  <!-- entrance glow -->
+  <rect x="290" y="1000" width="220" height="160" fill="#ffd9a3" opacity="0.16"/>
+  <rect width="800" height="1400" fill="url(#glowM)"/>
+  <rect y="1120" width="800" height="280" fill="#070a11"/>
+  <rect width="800" height="1400" fill="url(#vigM)"/>
+</svg>

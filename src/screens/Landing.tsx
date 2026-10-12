@@ -1,7 +1,5 @@
 import { LiquidGlass } from "../components/LiquidGlass";
-// imported so the bundler fingerprints the art and rebases the URL for whatever
-// base path the site is deployed under (e.g. GitHub Pages project sites)
-import heroArt from "../assets/art/lizhi-hero.jpg?url";
+import { MediaBackdrop } from "../components/MediaBackdrop";
 
 interface Props {
   onExplore: () => void;
@@ -15,15 +13,25 @@ interface Props {
  * the page's only type; the button is its only control, and the only glass on
  * the screen, because it has to stay legible over both the lit facade and the
  * dark sky behind it.
+ *
+ * The backdrop is a looping video on capable desktop viewports and a still
+ * everywhere else (see MediaBackdrop). It sits at the bottom of the stack; the
+ * scrim grades it for legibility and the content sits above both.
  */
 export function Landing({ onExplore }: Props) {
   return (
     <section className="landing" aria-label="立志楼数字孪生入口">
-      <div className="landing__bg" style={{ backgroundImage: `url("${heroArt}")` }} aria-hidden="true" />
+      <MediaBackdrop />
       <div className="landing__scrim" aria-hidden="true" />
 
       <div className="landing__content">
         <h1 className="landing__title">立志楼</h1>
+        <p className="landing__subtitle">
+          <span className="landing__subtitle-cn">建筑与设计学院 · 数学与统计学院 共用教学楼</span>
+          <span className="landing__subtitle-en">
+            Shared Teaching Building · School of Architecture &amp; Design / School of Mathematics &amp; Statistics
+          </span>
+        </p>
 
         <button className="enter" onClick={onExplore} aria-label="开始探索，进入立志楼细节面板 / Start exploring">
           {/* `fill` lets the pane stretch to the button's box so its padding and

@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#08090b" />
+    <title>立志楼 · 湖南科技大学</title>
+
+    <style>
+      /* ===================================================================
+         立志楼 · 入口页（独立静态版）
+         背景：桌面端视频，移动端与「减少动效」下为静态海报
+         =================================================================== */
+      :root {
+        color-scheme: dark;
+        --bg: #08090b;
+        --ink-0: #f7f8fa;
+        --ink-2: #b9bec7;
+        --ease: cubic-bezier(0.2, 0, 0, 1);
+        --font-cn: "PingFang SC", "HarmonyOS Sans SC", "Source Han Sans SC", "Noto Sans SC",
+          "Microsoft YaHei UI", "Microsoft YaHei", sans-serif;
+        --font-ui: "Bahnschrift", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+      }
+
+      * { box-sizing: border-box; }
+      html, body { height: 100%; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink-0);
+        font-family: var(--font-ui);
+        -webkit-font-smoothing: antialiased;
+        overflow: hidden;
+        overscroll-behavior: none;
+      }
+
+      /* -----------------------------------------------------------------
+         1 · 背景媒体：全屏铺满
+         fixed + inset:0 让它铺满视口；object-fit:cover 保证任何比例都不变形
+         z-index:-1 把它压到内容之下
+         ----------------------------------------------------------------- */
+      .bgmedia {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        overflow: hidden;
+        background: var(--bg);
+      }
+      .bgmedia__media {
+        position: absolute;
+        inset: 0;
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;      /* 铺满且不拉伸 */
+        object-position: 50% 50%;
+        border: 0;
+        pointer-events: none;
+      }
+      /* 层级：SVG 兜底 -> 真实照片 -> 视频 */
+      .bgmedia__photo { z-index: 1; animation: fade-in 420ms var(--ease) both; }
+      .bgmedia__video { z-index: 2; animation: fade-in 900ms var(--ease) both; }
+      @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+      /* 手机上换更合适的取景，并让海报优先 */
+      @media (max-width: 767px) {
+        .bgmedia__media { object-position: 50% 40%; }
+      }
+
+      /* -----------------------------------------------------------------
+         2 · 压暗层：为白字与毛玻璃控件保证可读性
+         ----------------------------------------------------------------- */
+      .scrim {
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(46% 26% at 50% 56%, rgba(4, 6, 10, 0.62), rgba(4, 6, 10, 0) 72%),
+          radial-gradient(88% 78% at 50% 46%, rgba(4, 6, 10, 0.56), rgba(4, 6, 10, 0.2) 64%, rgba(4, 6, 10, 0.5) 100%),
+          linear-gradient(180deg, rgba(4, 6, 10, 0.62) 0%, rgba(4, 6, 10, 0.12) 28%,
+            rgba(4, 6, 10, 0.18) 58%, rgba(4, 6, 10, 0.74) 100%);
+      }
+
+      /* -----------------------------------------------------------------
+         3 · 内容层：position:relative + z-index:1 盖在背景之上
+         ----------------------------------------------------------------- */
+      .stage {
+        position: relative;
+        z-index: 1;
+        height: 100%;
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+      }
+      .content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: clamp(22px, 3.4vh, 38px);
+        padding: 24px;
+        padding-bottom: max(24px, env(safe-area-inset-bottom));
+        text-align: center;
+        transform: translateY(-6%);
+      }
+
+      .title {
+        margin: 0;
+        font-family: var(--font-cn);
+        font-weight: 700;
+        font-size: clamp(58px, 9vw, 132px);
+        line-height: 1;
+        letter-spacing: 0.08em;
+        background: linear-gradient(178deg, #fff 6%, #f2f5f9 42%, #dfe5ec 78%, #fff 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        -webkit-text-stroke: 0.5px rgba(255, 255, 255, 0.22);
+        filter: drop-shadow(0 2px 24px rgba(0, 0, 0, 0.5));
+        text-wrap: balance;
+      }
+
+      .subtitle { margin: 0; display: flex; flex-direction: column; gap: 3px; max-width: 44ch; }
+      .subtitle__cn {
+        font-family: var(--font-cn);
+        font-size: clamp(12px, 1.1vw, 14px);
+        letter-spacing: 0.16em;
+        color: rgba(236, 242, 250, 0.9);
+        text-shadow: 0 1px 10px rgba(0, 0, 0, 0.62);
+      }
+      .subtitle__en {
+        font-size: clamp(9.5px, 0.72vw, 10.5px);
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: rgba(200, 214, 232, 0.62);
+        text-shadow: 0 1px 10px rgba(0, 0, 0, 0.62);
+      }
+
+      /* 唯一的控件：浅色毛玻璃胶囊 */
+      .enter {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 62px;
+        padding: 0 clamp(34px, 5vw, 58px);
+        border: 1px solid rgba(255, 255, 255, 0.44);
+        border-radius: 31px;
+        background: rgba(255, 255, 255, 0.16);
+        -webkit-backdrop-filter: blur(24px) saturate(180%) brightness(1.22);
+        backdrop-filter: blur(24px) saturate(180%) brightness(1.22);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 12px 32px -12px rgba(0, 0, 0, 0.55);
+        color: #fff;
+        cursor: pointer;
+        touch-action: manipulation;
+        transition: transform 120ms var(--ease), box-shadow 200ms var(--ease);
+      }
+      @media (hover: hover) {
+        .enter:hover { transform: translateY(-1px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 18px 40px -16px rgba(0, 0, 0, 0.72); }
+      }
+      .enter:active { transform: scale(0.96); }
+      .enter:focus-visible { outline: 2px solid #4c9ffe; outline-offset: 3px; }
+      .enter__label { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+      .enter__cn {
+        font-family: var(--font-cn);
+        font-size: clamp(19px, 1.7vw, 22px);
+        font-weight: 600;
+        letter-spacing: 0.2em;
+        text-indent: 0.2em;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+      }
+      .enter__en {
+        font-size: 10px;
+        letter-spacing: 0.26em;
+        text-indent: 0.26em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.82);
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+      }
+
+      /* -----------------------------------------------------------------
+         4 · 减少动效：不挂载视频（JS）+ 兜底隐藏（CSS）
+         ----------------------------------------------------------------- */
+      @media (prefers-reduced-motion: reduce) {
+        .bgmedia__video { display: none; }
+        * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- 背景层：z-index:-1，铺满视口 -->
+    <div class="bgmedia" aria-hidden="true">
+      <!-- 兜底层：始终有效的 SVG 海报，避免任何情况下出现破图 -->
+      <img class="bgmedia__media" src="./assets/bg-poster.svg" alt="" decoding="async" />
+      <!-- 真实海报：按断点选择；由脚本确认可访问后插入，避免 404 破图 -->
+      <img id="photo" class="bgmedia__media bgmedia__photo" alt="" decoding="async" hidden />
+      <!-- 视频：仅在「够宽 + 精细指针 + 未开启减少动效」且文件可访问时插入 -->
+    </div>
+
+    <div class="scrim" aria-hidden="true"></div>
+
+    <!-- 内容层：z-index:1，盖在背景之上 -->
+    <main class="stage">
+      <div class="content">
+        <h1 class="title">立志楼</h1>
+
+        <p class="subtitle">
+          <span class="subtitle__cn">建筑与设计学院 · 数学与统计学院 共用教学楼</span>
+          <span class="subtitle__en">
+            Shared Teaching Building · School of Architecture &amp; Design / School of Mathematics &amp; Statistics
+          </span>
+        </p>
+
+        <button class="enter" type="button" aria-label="开始探索，进入立志楼细节面板 / Start exploring">
+          <span class="enter__label">
+            <span class="enter__cn">开始探索</span>
+            <span class="enter__en">Start Exploring</span>
+          </span>
+        </button>
+      </div>
+    </main>
+
+    <script>
+      (function () {
+        var VIDEO_MIN_WIDTH = 768;
+        var media = document.querySelector(".bgmedia");
+        var photo = document.getElementById("photo");
+
+        /* HEAD 探测：只有确实存在才插入，避免控制台 404 与破图 */
+        function probe(url, onOk) {
+          fetch(url, { method: "HEAD" })
+            .then(function (r) { if (r.ok || r.status === 405) onOk(); })
+            .catch(function () {});
+        }
+
+        function mq(query) {
+          return window.matchMedia ? window.matchMedia(query) : { matches: false, addEventListener: function () {} };
+        }
+
+        var wide = mq("(min-width: " + VIDEO_MIN_WIDTH + "px)");
+        var fine = mq("(hover: hover) and (pointer: fine)");
+        var motion = mq("(prefers-reduced-motion: no-preference)");
+
+        /* ---- 静态海报：桌面用大图，手机用小图 ---- */
+        function syncPoster() {
+          var src = wide.matches ? "./assets/bg-poster.jpg" : "./assets/bg-mobile.jpg";
+          if (photo.getAttribute("data-src") === src) return;
+          photo.setAttribute("data-src", src);
+          photo.hidden = true;
+          probe(src, function () {
+            photo.src = src;
+            photo.hidden = false;
+          });
+        }
+
+        /* ---- 视频：只有三条件都满足才挂载，手机因此完全不下载 8MB ---- */
+        var videoEl = null;
+        function syncVideo() {
+          var want = wide.matches && fine.matches && motion.matches;
+
+          if (!want) {
+            if (videoEl) { videoEl.pause(); videoEl.remove(); videoEl = null; }
+            return;
+          }
+          if (videoEl) return;
+
+          probe("./assets/bg.webm", function () {
+            if (videoEl) return;
+            var v = document.createElement("video");
+            v.className = "bgmedia__media bgmedia__video";
+            /* muted + playsinline 是移动端与部分浏览器允许自动播放的前提 */
+            v.autoplay = true;
+            v.loop = true;
+            v.muted = true;
+            v.playsInline = true;
+            v.setAttribute("playsinline", "");
+            v.setAttribute("muted", "");
+            v.preload = "auto";
+            v.poster = "./assets/bg-poster.jpg";
+            v.disablePictureInPicture = true;
+            var s = document.createElement("source");
+            s.src = "./assets/bg.webm";
+            s.type = "video/webm";
+            v.appendChild(s);
+            media.appendChild(v);
+            videoEl = v;
+            /* 某些浏览器在元素插入后仍需显式 play() 才起播 */
+            var p = v.play();
+            if (p && p.catch) p.catch(function () {});
+          });
+        }
+
+        function syncAll() { syncPoster(); syncVideo(); }
+
+        syncAll();
+        [wide, fine, motion].forEach(function (q) { q.addEventListener("change", syncAll); });
+      })();
+    </script>
+  </body>
+</html>

@@ -13,11 +13,36 @@ An end-to-end front-end for the Lizhi Building at Hunan University of Science an
 
 整屏只有三样东西：**建筑、名字、一个选择**。
 
-- 全屏立志楼夜景背景（程序化生成，2K，无第三方素材）
-- 主标题「立志楼」——本页唯一的文字，近白渐变填充 + 0.5px 描边保证在照片上不糊
+- 全屏背景：桌面端为循环视频，移动端 / 减少动效 / 无法解码时为静态海报
+- 主标题「立志楼」——本页最大的文字，近白渐变填充 + 0.5px 描边保证在动态画面上不糊
+- 一行小字说明共用关系：**建筑与设计学院 · 数学与统计学院 共用教学楼**
 - 唯一控件「开始探索 / START EXPLORING」：浅色毛玻璃胶囊，点击后进入细节面板
 
-刻意去掉的东西：品牌标记与图标、状态胶囊、参数格子、底部信息栏、说明段落、扫描线、噪点层、发光与光晕。右上角曾经有实时在线率与时间、底部有坐标与标准信息、标题下有中英副标题，全部移除。
+刻意去掉的东西：品牌标记与图标、状态胶囊、参数格子、底部信息栏、说明段落、扫描线、噪点层、发光与光晕。
+
+#### 背景视频 / Background media
+
+把三个文件放进 `public/assets/`，代码会自动接管（文件名必须一致）：
+
+| 文件 | 用途 | 建议规格 |
+| --- | --- | --- |
+| `bg.webm` | 桌面端循环视频 | 1080p 或 720p，6–10 秒无缝循环，≤ 20 MB（GitHub 单文件上限 100 MB） |
+| `bg-poster.jpg` | 桌面静态海报（视频首帧 / 加载期间 / 减少动效时显示） | ≥ 1920×1080 |
+| `bg-mobile.jpg` | 手机静态海报（竖构图更佳） | 1080×1920 左右 |
+
+仓库里已放了 `bg-poster.svg` / `bg-mobile.svg` 作为**兜底海报**，所以缺文件时页面依然完整，不会出现破图。放了真图后真图自动覆盖。
+
+实现要点（`src/components/MediaBackdrop.tsx`）：
+
+1. **背景层**：`position: fixed; inset: 0; width/height: 100%; object-fit: cover; z-index: -1`，任何视口比例都铺满且不变形。
+2. **文字层**：内容容器 `position: relative; z-index: 1` 盖在背景与压暗层之上。
+3. **视频属性**：`autoplay loop muted playsinline`——`muted` + `playsinline` 是移动端与部分浏览器允许自动播放的前提；元素插入后再显式 `play()`，兼容部分浏览器的策略。
+4. **移动端不下载视频**：`<source media="…">` 对 `<video>` **无效**（`media` 属性不被支持），所以走 JS `matchMedia` **条件挂载**：视口 ≥ 768px、`(hover: hover) and (pointer: fine)`、且未开启减少动效时才插入 `<video>`。实测 430px 视口下视频元素不存在、0 字节视频流量。
+5. **减少动效降级**：`prefers-reduced-motion: reduce` 时不挂载视频，只保留静态海报；CSS 里再加一层 `display: none` 兜底。
+6. **相对路径**：一律 `./assets/…`，`public/` 由打包器原样复制，因此在域名根路径与 GitHub Pages 子路径（`/<repo>/`）下都不会 404。
+7. **不用 `<picture>` 做兜底**：`<picture>` 只在 `type`/`media` 不匹配时回退到 `<img>`；资源 404 会触发 `error` 并留下破图。所以这里先用 SVG 打底，再用一次 `HEAD` 探测确认文件存在后才插入真图 / 视频。
+
+另有一份**独立静态版** `public/standalone-index.html`：不依赖 React，同样的三层背景与降级逻辑，可直接当纯静态页使用（放进 `public/` 后随站点一起发布）。
 
 ### 2. 细节面板 · Detail console
 
@@ -73,18 +98,6 @@ An end-to-end front-end for the Lizhi Building at Hunan University of Science an
 
 ---
 
-## 背景图 / Artwork
-
-`tools/gen_backgrounds.py` 使用 Pillow 程序化生成蓝调时刻的建筑群像：渐变夜空、星空、云带、楼体窗格与竖向分格、入口暖光、体积雾、湿地面反射、光斑、暗角与胶片颗粒，并输出 2560 与 1600 两档尺寸。
-
-```bash
-python tools/gen_backgrounds.py
-```
-
-生成结果提交在 `src/assets/art/`，由打包器指纹化并自动重写路径，因此部署在子路径（GitHub Pages 项目站）下也能正确加载。
-
----
-
 ## 本地开发 / Development
 
 需要 Node.js 20+。
@@ -100,14 +113,17 @@ pnpm preview      # 预览构建结果
 技术栈：React 19 · TypeScript 5 · Vite 7 · 纯手写 CSS（无 UI 框架依赖）。监视画面与三维楼层板为手写 Canvas / CSS 3D，图标为项目内置 SVG 组件（单笔画、单 `currentColor`）。
 
 ```
+public/
+  assets/       背景视频与海报（bg.webm / bg-poster.jpg / bg-mobile.jpg）
+  standalone-index.html   独立静态版入口页（无 React 依赖）
 src/
-  components/   LiquidGlass 材质组件、图标
+  components/   LiquidGlass 材质组件、MediaBackdrop 背景媒体、图标
   data/         建筑 / 楼层 / 功能区 / 点位定义
   hooks/        传感器仿真（确定性随机）、定时器
   panels/       层级、视口、监视器、状态栏
   screens/      入口页、控制台
   styles/       设计令牌、玻璃材质、面板语言
-tools/          背景图生成、静态服务、验证用的 CDP 探针
+tools/          静态服务、验证用的 CDP 探针、部署脚本
 ```
 
 ## 数据说明 / Data
