@@ -1,0 +1,19 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# build output (the published site is built from source)
+dist/
+dist-probe/
+
+# local verification artefacts
+.verify/
+
+# editor / OS noise
+.DS_Store
+Thumbs.db
+*.local
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.log
