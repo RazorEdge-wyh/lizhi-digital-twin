@@ -89,13 +89,24 @@ tools/          背景图生成、静态服务、验证用的 CDP 探针
 
 ## 部署 / Deployment
 
-构建产物为纯静态文件。仓库根目录即站点根目录，GitHub Pages 直接从 `main` 分支根路径发布：
+线上站点：<https://razoredge-wyh.github.io/lizhi-digital-twin/>
+控制台直达：<https://razoredge-wyh.github.io/lizhi-digital-twin/#console>
+
+仓库只保存源码，由 `.github/workflows/deploy-pages.yml` 在 `main` 分支推送后自动构建并发布为 Pages 工件（先 `pnpm typecheck`，再 `pnpm build`，最后 `actions/deploy-pages`）。因此仓库中不需要提交 `dist/`。
 
 ```bash
-pnpm build        # dist/ 内的全部文件即是站点内容
+pnpm build        # 本地产出 dist/，内容与线上一致
 ```
 
-组件与字号均使用相对路径，因此在 `https://<user>.github.io/<repo>/` 子路径下同样可用。
+`vite.config.ts` 使用 `base: "./"`，字体与图片由打包器指纹化并重写为相对路径，所以在 `https://<user>.github.io/<repo>/` 这类子路径下无需额外配置即可正确加载。
+
+首次发布或需要重建仓库内容时，可用内置脚本通过 GitHub REST API 推送（本环境没有 git 可执行文件，脚本以 blobs → tree → commit → ref 的方式组装提交）：
+
+```bash
+GITHUB_TOKEN=<token> node tools/deploy-gh-pages.mjs <owner>/<repo>
+```
+
+脚本会把 Pages 的 build type 设为 `workflow`。**注意**：若仓库早先用“分支目录”方式开启过 Pages，GitHub 会残留一个 `pages-build-deployment` 工作流，它会发布源码 `index.html` 而不是构建产物，需要停用它，否则站点会指向未构建的源码。
 
 ## 许可 / License
 
