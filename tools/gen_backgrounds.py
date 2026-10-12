@@ -363,19 +363,6 @@ def render_hero(w: int = W, h: int = H) -> Image.Image:
     return add_grain_and_vignette(img)
 
 
-def render_workspace(w: int = 2560, h: int = 1440) -> Image.Image:
-    """Quieter, darker variant used behind the engine-style workspace."""
-    horizon = int(h * 0.68)
-    img = build_sky(w, h).convert("RGBA")
-    add_stars(img)
-    add_fog(img, horizon)
-    img = grade(img.convert("RGB"))
-    # pull everything down so glass panels stay legible on top
-    img = Image.blend(img, Image.new("RGB", (w, h), (6, 9, 16)), 0.52)
-    img = img.filter(ImageFilter.GaussianBlur(2.2))
-    return add_grain_and_vignette(img)
-
-
 def save_variants(name: str, img: Image.Image, widths: list[int]) -> None:
     for wpx in widths:
         ratio = wpx / img.width
@@ -387,12 +374,8 @@ def save_variants(name: str, img: Image.Image, widths: list[int]) -> None:
 
 
 if __name__ == "__main__":
+    # The landing screen is the only surface that uses photography: the console
+    # is a flat neutral surface so the glass chrome stays legible on top of it.
     print("rendering hero ...")
-    hero = render_hero()
-    save_variants("lizhi-hero", hero, [2560])
-
-    print("rendering workspace backdrop ...")
-    ws = render_workspace()
-    save_variants("lizhi-workspace", ws, [2560])
-
+    save_variants("lizhi-hero", render_hero(), [2560])
     print("done ->", OUT)

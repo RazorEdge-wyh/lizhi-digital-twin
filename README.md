@@ -1,9 +1,9 @@
 # 立志楼 · 未来智能空间建筑数字孪生面板
 **Lizhi Building · Intelligent Space Digital Twin Console**
 
-湖南科技大学立志楼的三维数字孪生界面：一个游戏感（game-like）的入口页，加一个仿 Unity / Godot 风格的建筑运行控制台。整体视觉基于液态玻璃（Liquid Glass）材质：真实的边缘折射、镜面高光、噪点薄膜与多层半透明面板。
+湖南科技大学立志楼的数字孪生界面：一个极简的入口页，加一个仿 Unity / Godot 风格的建筑运行控制台。视觉遵循 Apple 式的克制——玻璃只用于「控制层」（需要浮在内容之上、必须保持可读的控件与外壳），内容面一律扁平 + 发丝分隔线。
 
-An end-to-end front-end for the Lizhi Building at Hunan University of Science and Technology: a cinematic landing screen that opens into an engine-editor-style console (menu bar, hierarchy, viewport, monitor, sensor status bar) built on a liquid-glass material system.
+An end-to-end front-end for the Lizhi Building at Hunan University of Science and Technology: a deliberately minimal landing screen that opens into an engine-editor-style console (project menu bar, hierarchy, viewport, monitor, per-floor sensor status) built on a restrained liquid-glass material system.
 
 ---
 
@@ -11,33 +11,60 @@ An end-to-end front-end for the Lizhi Building at Hunan University of Science an
 
 ### 1. 入口页 · Landing
 
+整屏只有三样东西：**建筑、名字、一个选择**。
+
 - 全屏立志楼夜景背景（程序化生成，2K，无第三方素材）
-- 左侧居中主标题「立志楼」艺术字：渐变填充 + 描边 + 外发光 + 工程感蓝色标尺线
-- 副标题 `LIZHI BUILDING`、小标题「未来智能空间建筑」与项目说明
-- 主按钮「开始探索 / START EXPLORING」：真实折射的液态玻璃按钮，点击后淡入细节面板
-- 右上角实时状态胶囊（点位在线率 / 时间）、底部坐标与标准信息
+- 主标题「立志楼」——本页唯一的文字，近白渐变填充 + 0.5px 描边保证在照片上不糊
+- 唯一控件「开始探索 / START EXPLORING」：浅色毛玻璃胶囊，点击后进入细节面板
+
+刻意去掉的东西：品牌标记与图标、状态胶囊、参数格子、底部信息栏、说明段落、扫描线、噪点层、发光与光晕。右上角曾经有实时在线率与时间、底部有坐标与标准信息、标题下有中英副标题，全部移除。
 
 ### 2. 细节面板 · Detail console
 
-类 Unity / Godot 的简化编辑器布局，全部面板使用毛玻璃材质：
+类 Unity / Godot 的简化编辑器布局，四个区域对应面板化建筑的全部需求：
 
 | 区域 | 内容 |
 | --- | --- |
-| **上方菜单栏** | 项目（新建 / 打开 / 最近 / 保存 / 导入 / 导出 / 返回）、视图（三维模型 / 平面图 / 数据面板 / 全楼 / 面板开关）、监测（暂停数据流 / 刷新 / 点位自检 / 告警订阅）、帮助；中间显示当前工程路径与保存时间 |
-| **左侧层级 Hierarchy** | 建筑 → 楼层（F1–F8）→ 功能区 → 传感器组，可展开折叠、单击选中、双击聚焦；底部显示所选楼层点位统计 |
-| **中央视口 Viewport** | 三种模式：**三维模型**（等距楼层堆叠，选中楼层高亮，异常楼层变色，扫描光带）、**平面图**（房间 + 传感点位 + 比例尺 / 指北针）、**数据面板**（逐点位遥测表格 + 24h 趋势） |
-| **右侧监视器 Monitor** | 多路监视画面，四种通道实时绘制：深度态势（波形）、热成像（热力阵列 + 十字测温）、无线感知（雷达扫描）、人流统计（分区柱状）；可暂停、可单路放大 |
-| **下方状态栏 Status bar** | 八个楼层瓦片（温度 / 湿度 / CO₂ / 人数 / 电耗 / PMV + 迷你趋势线），右侧全楼汇总（总负荷、在场人数、在线率、平均 CO₂、光伏出力） |
+| **上方菜单栏** | 项目（新建 / 打开 / 保存 / 导入 / 导出 / 返回）、视图（三维 / 平面 / 数据 / 面板开关）、监测（暂停数据流 / 刷新 / 自检 / 告警订阅）、帮助；中间是工程名与保存时间 |
+| **左侧层级 Hierarchy** | 建筑 → 楼层（F1–F8）→ 功能区 → 传感器组；单击选中、展开折叠，底部是该层温度 / 湿度 / CO₂ 与点位在线数 |
+| **中央视口 Viewport** | 三种模式：**三维模型**（等距楼层板堆叠，选中层高亮、异常层变色，左侧屏幕空间楼层列表）、**平面图**（房间 + 传感点位 + 比例尺 / 指北针）、**数据面板**（逐点位遥测表） |
+| **右侧监视器 Monitor** | 三路画面，四种通道实时 Canvas 绘制：深度态势（波形）、热成像（单色亮度热力阵列 + 十字测温）、无线感知（雷达）、人流统计（分区柱状）；可暂停 |
+| **下方状态栏 Status bar** | 八个楼层瓦片（温度 / 湿度 / CO₂ / 人数 / 电耗 / PMV），右侧全楼汇总（负荷、在场人数、点位在线率、平均 CO₂） |
 
-交互：`1`–`8` 选择楼层，`M` / `P` / `D` 切换视图，`F` 切换全楼，`空格` 暂停数据流，`Ctrl/⌘+S` 保存，`Esc` 返回入口页。深链接 `#console` 可直接进入控制台。
+相比上一版同样做了减法：去掉了 HUD 四角框、坐标轴指示器、扫描光带、跑道灯式脉冲点、迷你趋势线、面板间的双层玻璃与渐变高光；分隔改为 1px 发丝线，强调只保留「选中态」与语义色。
+
+交互：`1`–`8` 选择楼层，`M` / `P` / `D` 切换视图，`空格` 暂停数据流，`Ctrl/⌘+S` 保存，`Esc` 返回入口页。深链接 `#console` 可直接进入控制台。
+
+---
+
+## 设计准则 / Design rules applied
+
+本版按以下公开规范重做（文档已抓取比对）：
+
+- **Apple 式玻璃克制** —— 玻璃是「控制层」材质：只出现在入口按钮、菜单栏、浮层与面板外壳；内容面用实色 + 发丝线，避免把毛玻璃当成装饰铺满全屏。
+- **阴影负责层级，描边负责结构**（`jakubkrehel/make-interfaces-feel-better`）—— 卡片与按钮的立体感来自分层透明 `box-shadow`，1px 描边只用于分隔线、选中态与聚焦态。
+- **同心圆角** —— 外层半径 = 内层半径 + 内边距，避免嵌套圆角看起来「掐住」。
+- **一致的图标笔画** —— 单一图标集、单一 `1.5px` 笔画（与正文字重匹配），全部走 `currentColor`，状态由 CSS 决定，同一图标不出现两套资源。
+- **按压反馈** —— `transform: scale(0.96)`；触达面积用伪元素补到 40px（桌面）/ 44px（触摸）。
+- **`font-variant-numeric: tabular-nums`** —— 所有会跳动的读数，避免数字变化引起抖动。
+- **不使用 `transition: all`**；只动 `transform` / `opacity` / `background` / `color`。
+- **`prefers-reduced-motion`** —— 全局降级，背景漂移与所有过渡在减弱动效时停用。
+- **对比度** —— 正文对面板底色 ≥ 7:1，最弱的四级灰仍为 5.8:1，语义色 5.6–6.7:1（WCAG AA 通过）；颜色从不是唯一的状态指示，旁边始终有文字标签。
 
 ---
 
 ## 液态玻璃的实现 / How the glass works
 
-`src/components/LiquidGlass.tsx` 分两层实现：
+`src/components/LiquidGlass.tsx` 只有三件事：
 
-1. **CSS 玻璃基座** —— `backdrop-filter: blur() saturate()`、渐变玻璃体、内侧镜面高光、蚀刻发丝边、以及一层亚像素噪点薄膜，避免大面积模糊产生色带。
+1. **玻璃本体** —— `backdrop-filter: blur() saturate()`，加上材质自身的 tint/wash。四种材质重量：`thin` / `regular` / `thick`（深色外壳）与 `frost`（浅色控件，会额外 `brightness(1.22)` 提亮背景，这正是 Apple 在照片上放控件时改用的浅色玻璃）。
+2. **真实折射边缘** —— 在 canvas 上按圆角矩形 SDF 光栅化位移场（R 通道存水平位移、G 通道存垂直位移，中灰 128 为基准），编码成 data URL 交给 SVG `feDisplacementMap`，作为该元素的 `backdrop-filter`。玻璃边缘因此真正**折射背景**，即 Apple Liquid Glass 与 [rdev/liquid-glass-react](https://github.com/rdev/liquid-glass-react) 所采用的技术路线。位移图按尺寸缓存，只在 `ResizeObserver` 报告尺寸变化时重算。
+3. **一条发丝高光 + 一层内侧暗影** —— 真实玻璃受光的样子，仅此而已。
+
+刻意不做：彩色辉光、渐变文字、噪点薄膜、流动光泽、多重投影。不支持在 backdrop 上运行滤镜的浏览器自动退回纯 `blur()`，界面不会退化成方块。
+
+> 嵌套的 `backdrop-filter` 在 Chromium 中只会采样中间层，下拉菜单与模态框因此改用高不透明度表面并关闭模糊（见 `global.css` 中 `.menu` / `.modal__card` 的注释）。
+
 2. **真实折射** —— 在 canvas 上按圆角矩形 SDF 光栅化位移场（R 通道存水平位移、G 通道存垂直位移，中灰 128 为基准），编码成 data URL 交给 SVG `feDisplacementMap`，再作为该元素的 `backdrop-filter` 使用。玻璃边缘因此真正**折射背景**，即 Apple Liquid Glass 与 [rdev/liquid-glass-react](https://github.com/rdev/liquid-glass-react) 所采用的技术路线。位移图按尺寸缓存，仅在 `ResizeObserver` 报告尺寸变化时重算。
 
 不支持在 backdrop 上运行滤镜的浏览器会自动回退到第 1 层，界面不会退化成不可读的方块。
@@ -70,11 +97,11 @@ pnpm build        # 产出 dist/
 pnpm preview      # 预览构建结果
 ```
 
-技术栈：React 19 · TypeScript 5 · Vite 7 · 纯手写 CSS（无 UI 框架依赖）。图表为手写 SVG，监视画面为手写 Canvas 渲染，图标为项目内置 SVG 组件。
+技术栈：React 19 · TypeScript 5 · Vite 7 · 纯手写 CSS（无 UI 框架依赖）。监视画面与三维楼层板为手写 Canvas / CSS 3D，图标为项目内置 SVG 组件（单笔画、单 `currentColor`）。
 
 ```
 src/
-  components/   LiquidGlass 材质组件、图标、SVG 图表
+  components/   LiquidGlass 材质组件、图标
   data/         建筑 / 楼层 / 功能区 / 点位定义
   hooks/        传感器仿真（确定性随机）、定时器
   panels/       层级、视口、监视器、状态栏

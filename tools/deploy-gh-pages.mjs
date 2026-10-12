@@ -36,8 +36,9 @@ const SKIP_DIRS = new Set([
   ".pnpm-store",
 ]);
 
-/** Dot-directories are skipped, but the CI workflow must be published. */
-const FORCE_INCLUDE = new Set([".github"]);
+/** Dot-paths are skipped, but the CI workflow and the ignore file are real
+ *  repository content and must be published. */
+const FORCE_INCLUDE = new Set([".github", ".gitignore"]);
 
 async function api(path, { method = "GET", body, allow404 = false } = {}) {
   const res = await fetch(`${API}${path}`, {
@@ -128,10 +129,11 @@ async function main() {
   }
 
   // 2. upload every tracked file as a blob
-  const files = (await walk(ROOT)).filter((f) => {
-    const parts = relative(ROOT, f).split(sep);
-    return !parts.some((part) => part.startsWith(".") && part !== "." && part !== ".github");
-  });
+  const files = (await walk(ROOT)).filter((f) =>
+    relative(ROOT, f)
+      .split(sep)
+      .every((part) => !part.startsWith(".") || part === "." || FORCE_INCLUDE.has(part)),
+  );
   const tree = [];
   let bytes = 0;
   for (const file of files) {
@@ -158,10 +160,11 @@ async function main() {
   });
 
   const message =
-    "feat: 立志楼智能空间数字孪生面板 / Lizhi Building digital twin console\n\n" +
-    "Landing screen with liquid-glass \"开始探索 / Start Exploring\" entry, plus an\n" +
-    "engine-editor-style console: project menu bar, floor hierarchy, 3D/plan/telemetry\n" +
-    "viewport, multi-channel monitor feeds and a whole-building sensor status bar.";
+    "refine: 极简首页 + 收敛的控制台 / minimal landing and a restrained console\n\n" +
+    "Landing is now the building, the name and one choice; the console drops HUD\n" +
+    "furniture, gradients, glows and per-panel glass in favour of hairline\n" +
+    "structure and a single material system (Apple-style: glass for the control\n" +
+    "layer only).";
 
   const now = Math.floor(Date.now() / 1000);
   const commit = await api(`/repos/${owner}/${NAME}/git/commits`, {

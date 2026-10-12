@@ -17,3 +17,7 @@ Thumbs.db
 !.vscode/extensions.json
 .idea/
 *.log
+
+# local design-reference cache (fetched guidance docs)
+.skills-ref/
+

@@ -1,20 +1,25 @@
 /**
- * Liquid-glass surface.
+ * Liquid glass surface — Apple-style restraint.
  *
- * Two layers of realism are stacked here:
+ * The pane is built from three things only:
  *
- * 1. A physically-flavoured CSS glass base -- backdrop blur + saturation, a
- *    tinted gradient body, a bright specular rim, an inner shadow and a fine
- *    noise film so the pane never reads as flat plastic.
- * 2. A genuine refraction pass. We rasterise a signed-distance-field of a
- *    rounded rectangle into a canvas, encode the gradient as an RGB
- *    displacement map, then hand it to an SVG `feDisplacementMap` used as the
- *    element's `backdrop-filter`. That bends the *backdrop itself* around the
- *    edges, which is the effect Apple's Liquid Glass and the rdev
- *    liquid-glass-react component both approximate.
+ *  1. a backdrop blur + saturation lift, so the pane reads as frosted glass;
+ *  2. an edge that genuinely refracts the backdrop. We rasterise a rounded-rect
+ *     signed distance field into a canvas, encode the gradient as an RGB
+ *     displacement map (R = x offset, G = y offset, mid-grey = no offset) and
+ *     hand it to an SVG `feDisplacementMap` used as this element's
+ *     `backdrop-filter`. That is the same technique as Apple's Liquid Glass and
+ *     rdev/liquid-glass-react, and it is what makes the rim bend the image
+ *     behind it instead of just sitting on top;
+ *  3. a single hairline highlight along the top edge plus a very light inner
+ *     shade, which is how a real pane catches light.
  *
- * If a browser cannot run filters over a backdrop, layer 1 still stands on its
- * own, so nothing degrades into an unreadable box.
+ * Deliberately absent: coloured glows, gradient text, noise film, animated
+ * sheen, drop shadows beyond one soft elevation shadow. Glass is a material for
+ * controls and structural chrome; using it everywhere reads as decoration.
+ *
+ * Browsers that cannot filter a backdrop simply get (1) and (3), which still
+ * looks like glass and never degrades into an unreadable box.
  */
 import {
   forwardRef,
@@ -29,45 +34,42 @@ import {
   type ReactNode,
 } from "react";
 
-export type GlassTone = "neutral" | "cool" | "warm" | "ink";
+export type GlassTone = "regular" | "thin" | "thick" | "frost";
 export type GlassRadius = "sm" | "md" | "lg" | "xl";
-
 export interface LiquidGlassProps extends HTMLAttributes<HTMLDivElement> {
   children?: ReactNode;
-  /** Corner radius token (or any CSS length via `radiusPx`). */
   radius?: GlassRadius;
   /** Explicit radius in px, overriding `radius`. */
   radiusPx?: number;
-  /** Colour bias of the tinted glass body. */
+  /**
+   * Material weight, mirroring how Apple names glass variants:
+   * `thin` lets the backdrop through, `regular` is the default control
+   * material, `thick` is for chrome that must stay legible over busy content.
+   */
   tone?: GlassTone;
-  /** Strength of the edge refraction, 0 disables the SVG pass entirely. */
+  /** Edge refraction strength. 0 disables the SVG pass entirely. */
   refraction?: number;
   /** Backdrop blur in px. */
   blur?: number;
-  /** Adds a bright top-lit rim, as if a light source sits above the pane. */
-  specular?: boolean;
-  /** Draw the animated sheen sweep. */
-  sheen?: boolean;
   /** Elevation shadow strength. */
-  elevation?: 0 | 1 | 2 | 3;
-  /** Renders the pane as a non-interactive container with no hover response. */
-  static?: boolean;
+  elevation?: 0 | 1 | 2;
   /** Let the content wrapper stretch to the full pane height. */
   fill?: boolean;
 }
 
-const RADII: Record<GlassRadius, number> = { sm: 10, md: 14, lg: 18, xl: 26 };
+const RADII: Record<GlassRadius, number> = { sm: 10, md: 14, lg: 20, xl: 28 };
 
-const TONES: Record<GlassTone, string> = {
-  neutral: "rgba(148, 170, 200, 0.10)",
-  cool: "rgba(96, 190, 230, 0.10)",
-  warm: "rgba(255, 196, 140, 0.09)",
-  ink: "rgba(8, 12, 22, 0.42)",
-};
-
-/** Surfaces that float above dense UI need their own opaque floor. */
-const SURFACES: Partial<Record<GlassTone, string>> = {
-  ink: "rgba(7, 11, 20, 0.72)",
+/**
+ * Tint (the material's own body) and wash (a neutral veil over it). `frost` is
+ * the light material used for a control that floats over imagery: a white body
+ * brightens the backdrop behind it so the label stays readable over both lit
+ * and dark content, which is exactly when Apple reaches for light glass.
+ */
+const TONES: Record<GlassTone, { tint: string; wash: string }> = {
+  thin: { tint: "rgba(255, 255, 255, 0.07)", wash: "rgba(10, 14, 22, 0.10)" },
+  regular: { tint: "rgba(255, 255, 255, 0.10)", wash: "rgba(10, 14, 22, 0.22)" },
+  thick: { tint: "rgba(255, 255, 255, 0.07)", wash: "rgba(8, 12, 20, 0.62)" },
+  frost: { tint: "rgba(255, 255, 255, 0.44)", wash: "rgba(255, 255, 255, 0.16)" },
 };
 
 /** Signed distance to a rounded rectangle, in half-extent space. */
@@ -84,14 +86,12 @@ function smoothstep(a: number, b: number, t: number): number {
 }
 
 /**
- * Build a data-URL displacement map for a rounded rectangle.
- *
- * R encodes horizontal offset, G vertical, both biased to mid-grey (128) as
- * required by `feDisplacementMap`. The displacement is concentrated in a band
- * just inside the border, which is what produces the "thick glass edge" look.
+ * Build a data-URL displacement map for a rounded rectangle. The displacement
+ * is concentrated in a narrow band just inside the border, which is what gives
+ * the edge its thickness.
  */
 function buildDisplacementMap(w: number, h: number, radius: number, strength: number): string {
-  const scale = 0.5; // render at half res; the result is smooth anyway
+  const scale = 0.5; // half resolution is plenty for a smooth field
   const cw = Math.max(2, Math.round(w * scale));
   const ch = Math.max(2, Math.round(h * scale));
   const canvas = document.createElement("canvas");
@@ -105,19 +105,16 @@ function buildDisplacementMap(w: number, h: number, radius: number, strength: nu
   const hw = cw / 2;
   const hh = ch / 2;
   const r = Math.min(radius * scale, hw, hh);
-  const band = Math.max(6, Math.min(cw, ch) * 0.16);
+  const band = Math.max(4, Math.min(cw, ch) * 0.12);
 
   for (let y = 0; y < ch; y++) {
     for (let x = 0; x < cw; x++) {
       const px = x + 0.5 - hw;
       const py = y + 0.5 - hh;
       const dist = roundedRectSDF(px, py, hw, hh, r);
-      // 1 at the border, easing to 0 `band` px inside the pane
-      const falloff = 1 - smoothstep(-band, 0, dist);
-      // a gentle outward push: convex glass magnifies what is behind it
-      const magnify = smoothstep(-band, 0, dist) * 0.35;
-      const amount = (falloff * 0.85 + magnify) * strength * 12;
-      // direction away from the centre, normalised by half-extents
+      // 1 at the border easing to 0 `band` px inside
+      const rim = 1 - smoothstep(-band, 0, dist);
+      const amount = rim * strength * 9;
       const nx = px / Math.max(1, hw);
       const ny = py / Math.max(1, hh);
       const len = Math.hypot(nx, ny) || 1;
@@ -137,13 +134,9 @@ function buildDisplacementMap(w: number, h: number, radius: number, strength: nu
   }
 }
 
-/** Does this browser support a filter function inside backdrop-filter? */
 function supportsBackdropFilterUrl(): boolean {
   if (typeof CSS === "undefined" || typeof CSS.supports !== "function") return false;
-  return (
-    CSS.supports("backdrop-filter", "url(#x)") ||
-    CSS.supports("-webkit-backdrop-filter", "url(#x)")
-  );
+  return CSS.supports("backdrop-filter", "url(#x)") || CSS.supports("-webkit-backdrop-filter", "url(#x)");
 }
 
 export const LiquidGlass = forwardRef<HTMLDivElement, LiquidGlassProps>(function LiquidGlass(
@@ -151,13 +144,10 @@ export const LiquidGlass = forwardRef<HTMLDivElement, LiquidGlassProps>(function
     children,
     radius = "lg",
     radiusPx,
-    tone = "neutral",
+    tone = "regular",
     refraction = 1,
-    blur = 16,
-    specular = true,
-    sheen = false,
-    elevation = 2,
-    static: isStatic = false,
+    blur = 20,
+    elevation = 1,
     fill = false,
     className,
     style,
@@ -200,7 +190,7 @@ export const LiquidGlass = forwardRef<HTMLDivElement, LiquidGlassProps>(function
       return;
     }
     const r = radiusPx ?? RADII[radius];
-    // Debounce: resizing a pane should not rasterise a field per frame.
+    // debounce: resizing a pane should not rasterise a field every frame
     const timer = window.setTimeout(() => {
       setMap(buildDisplacementMap(size.w, size.h, r, refraction));
     }, 60);
@@ -208,15 +198,18 @@ export const LiquidGlass = forwardRef<HTMLDivElement, LiquidGlassProps>(function
   }, [canRefract, refraction, radius, radiusPx, size.w, size.h]);
 
   const px = radiusPx ?? RADII[radius];
+  const material = TONES[tone];
+  // The SDF pass already scales its offsets, so a refracted edge needs no extra
+  // filter blur; a large `blur()` here would smear the very edge it produces.
+  const lift = tone === "frost" ? " brightness(1.22)" : "";
   const backdrop = map
-    ? `url(#${filterId}) blur(${blur}px) saturate(165%) brightness(1.06)`
-    : `blur(${blur}px) saturate(165%) brightness(1.06)`;
+    ? `url(#${filterId}) saturate(180%)${lift}`
+    : `blur(${blur}px) saturate(180%)${lift}`;
 
   const cssVars = {
     "--lg-radius": `${px}px`,
-    "--lg-tint": TONES[tone],
-    "--lg-surface": SURFACES[tone] ?? "transparent",
-    "--lg-blur": `${blur}px`,
+    "--lg-tint": material.tint,
+    "--lg-wash": material.wash,
     "--glass-backdrop": backdrop,
   } as CSSProperties;
 
@@ -229,9 +222,6 @@ export const LiquidGlass = forwardRef<HTMLDivElement, LiquidGlassProps>(function
         `lg--r-${radius}`,
         `lg--e${elevation}`,
         `lg--tone-${tone}`,
-        specular ? "lg--specular" : "",
-        sheen ? "lg--sheen" : "",
-        isStatic ? "lg--static" : "",
         fill ? "lg--fill" : "",
         className ?? "",
       ]
@@ -241,13 +231,13 @@ export const LiquidGlass = forwardRef<HTMLDivElement, LiquidGlassProps>(function
       data-refraction={map ? "on" : "off"}
     >
       {map && (
-        <svg className="lg__filter-defs" aria-hidden="true" focusable="false">
+        <svg className="lg__defs" aria-hidden="true" focusable="false">
           <filter id={filterId} x="0" y="0" width="100%" height="100%" colorInterpolationFilters="sRGB">
             <feImage href={map} x="0" y="0" width={size.w} height={size.h} preserveAspectRatio="none" result="map" />
             <feDisplacementMap
               in="SourceGraphic"
               in2="map"
-              scale={refraction * 12}
+              scale={refraction * 9}
               xChannelSelector="R"
               yChannelSelector="G"
             />
@@ -255,16 +245,12 @@ export const LiquidGlass = forwardRef<HTMLDivElement, LiquidGlassProps>(function
         </svg>
       )}
       <span className="lg__body" aria-hidden="true" />
-      <span className="lg__rim" aria-hidden="true" />
-      {specular && <span className="lg__specular" aria-hidden="true" />}
-      <span className="lg__noise" aria-hidden="true" />
-      {sheen && <span className="lg__sheen" aria-hidden="true" />}
       <div className="lg__content">{children}</div>
     </div>
   );
 });
 
-/** Thin hairline divider that reads as an etched groove in glass. */
+/** Hairline divider — structure, not decoration. */
 export function GlassDivider({ vertical = false }: { vertical?: boolean }) {
-  return <span className={vertical ? "glass-rule glass-rule--v" : "glass-rule"} aria-hidden="true" />;
+  return <span className={vertical ? "hairline hairline--v" : "hairline"} aria-hidden="true" />;
 }
