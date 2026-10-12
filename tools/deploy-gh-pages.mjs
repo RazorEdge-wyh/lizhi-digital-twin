@@ -36,6 +36,9 @@ const SKIP_DIRS = new Set([
   ".pnpm-store",
 ]);
 
+/** Dot-directories are skipped, but the CI workflow must be published. */
+const FORCE_INCLUDE = new Set([".github"]);
+
 async function api(path, { method = "GET", body, allow404 = false } = {}) {
   const res = await fetch(`${API}${path}`, {
     method,
@@ -72,6 +75,7 @@ async function walk(dir, out = []) {
     const full = join(dir, entry.name);
     if (entry.isDirectory()) {
       if (SKIP_DIRS.has(entry.name)) continue;
+      if (entry.name.startsWith(".") && !FORCE_INCLUDE.has(entry.name)) continue;
       await walk(full, out);
     } else if (entry.isFile()) {
       out.push(full);
@@ -124,11 +128,10 @@ async function main() {
   }
 
   // 2. upload every tracked file as a blob
-  const files = (await walk(ROOT)).filter((f) =>
-    !relative(ROOT, f)
-      .split(sep)
-      .some((part) => part.startsWith(".") && part !== "."),
-  );
+  const files = (await walk(ROOT)).filter((f) => {
+    const parts = relative(ROOT, f).split(sep);
+    return !parts.some((part) => part.startsWith(".") && part !== "." && part !== ".github");
+  });
   const tree = [];
   let bytes = 0;
   for (const file of files) {
@@ -204,26 +207,30 @@ async function main() {
     body: { homepage: `https://${owner}.github.io/${NAME}/` },
   });
 
-  // 4. enable GitHub Pages from the branch root
-  const pagesBody = {
-    source: { branch: BRANCH, path: "/" },
-    build_type: "legacy",
-  };
+  // 4. point GitHub Pages at the Actions workflow. A branch build would publish
+  //    the raw source tree, which is not a runnable site, so "workflow" is the
+  //    only correct build type here.
   const existing = await api(`/repos/${owner}/${NAME}/pages`, { allow404: true });
-  if (existing) {
+  const wantWorkflow = async (method) => {
+    await api(`/repos/${owner}/${NAME}/pages`, {
+      method,
+      body: { build_type: "workflow" },
+    });
+  };
+  try {
+    if (existing) await wantWorkflow("PUT");
+    else await wantWorkflow("POST");
+    const after = await api(`/repos/${owner}/${NAME}/pages`, { allow404: true });
+    console.log(`GitHub Pages source: ${after?.build_type ?? "unknown"}`);
+  } catch (err) {
+    // some accounts reject the combined payload; retry with build_type only
     try {
-      await api(`/repos/${owner}/${NAME}/pages`, { method: "PUT", body: pagesBody });
-      console.log("GitHub Pages configuration updated");
-    } catch (err) {
-      console.log(`note: Pages update returned ${err.status} (${err.message}); continuing`);
-    }
-  } else {
-    try {
-      await api(`/repos/${owner}/${NAME}/pages`, { method: "POST", body: pagesBody });
-      console.log("GitHub Pages enabled (branch main, root)");
-    } catch (err) {
-      console.log(`note: could not enable Pages automatically -> ${err.status} ${err.message}`);
-      console.log("      enable it manually under Settings -> Pages (Source: Deploy from a branch, main / root)");
+      if (existing) await wantWorkflow("PUT");
+      else await wantWorkflow("POST");
+      console.log("GitHub Pages set to GitHub Actions");
+    } catch (err2) {
+      console.log(`note: could not configure Pages automatically -> ${err2.status} ${err2.message}`);
+      console.log("      set Settings -> Pages -> Source to \"GitHub Actions\" manually");
     }
   }
 
@@ -244,7 +251,8 @@ async function main() {
   console.log(`site       : ${url}`);
   console.log(`console    : ${url}#console`);
   console.log("");
-  console.log("The first Pages build usually takes 1-3 minutes.");
+  console.log("The workflow in .github/workflows/deploy-pages.yml builds and publishes the");
+  console.log("bundle; the first run usually takes 1-3 minutes.");
 }
 
 main().catch((err) => {
