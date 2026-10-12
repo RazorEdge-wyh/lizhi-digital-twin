@@ -84,7 +84,7 @@ interface Material {
 
 const MATERIALS: Record<GlassVariant, Material> = {
   chrome: {
-    body: "rgba(12, 15, 20, 0.66)",
+    body: "rgba(8, 10, 14, 0.7)",
     fallback: "blur(20px) saturate(160%)",
   },
   light: {

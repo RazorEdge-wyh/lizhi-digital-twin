@@ -40,24 +40,28 @@
   color-scheme: dark;
 
   /* neutral ink scale — no tinted greys */
-  --ink-0: #f7f8fa;
-  --ink-1: #e6e8ec;
-  --ink-2: #b9bec7;
-  --ink-3: #8b9199;
-  --ink-4: #63696f;
-  --ink-5: #3f4449;
+  --ink-0: #ffffff;
+  --ink-1: #e8ebef;
+  --ink-2: #b6bcc5;
+  --ink-3: #878e97;
+  --ink-4: #5f666d;
+  --ink-5: #3c4147;
 
-  --bg: #08090b;
-  --surface: #101215;
-  --surface-2: #16181c;
+  /* black-dominant base: surfaces are near-black, not grey */
+  --bg: #030407;
+  --surface: #080a0e;
+  --surface-2: #0d1015;
 
-  /* structure, not decoration */
-  --hairline: rgba(255, 255, 255, 0.11);
-  --hairline-soft: rgba(255, 255, 255, 0.065);
-
-  /* the only accent, and only for selection */
-  --accent: #4c9ffe;
-  --accent-quiet: rgba(76, 159, 254, 0.16);
+  /* the few highlights the design allows itself */
+  --edge: rgba(255, 255, 255, 0.22);
+  --edge-soft: rgba(255, 255, 255, 0.12);
+  --accent: #6fd3ff;
+  --accent-dim: rgba(111, 211, 255, 0.55);
+  --accent-quiet: rgba(111, 211, 255, 0.12);
+  --sheen: rgba(255, 255, 255, 0.55);
+  /* structural dividers (aliases kept so one name describes one job) */
+  --hairline: var(--edge);
+  --hairline-soft: var(--edge-soft);
 
   /* semantics, used only where they carry meaning */
   --ok: #5ec98a;
@@ -71,9 +75,8 @@
     "Microsoft YaHei UI", "Microsoft YaHei", "SimHei", sans-serif;
   --font-mono: "Cascadia Mono", "JetBrains Mono", Consolas, "SFMono-Regular", monospace;
 
-  /* soft, low-opacity elevation only */
-  --sh-1: 0 1px 2px rgba(0, 0, 0, 0.28);
-  --sh-2: 0 12px 32px -12px rgba(0, 0, 0, 0.55);
+  --sh-1: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --sh-2: 0 14px 34px -14px rgba(0, 0, 0, 0.8);
 
   --dur-fast: 120ms;
   --dur: 200ms;
@@ -81,9 +84,19 @@
   --ease: cubic-bezier(0.2, 0, 0, 1);
 }
 
+/* Square by default. Panels are drawn with a 1px highlight edge and corner
+   ticks instead of radius, which is what makes the console read as instrument
+   chrome rather than as a consumer app. */
+*,
+*::before,
+*::after {
+  border-radius: 0;
+}
+
 * {
   box-sizing: border-box;
 }
+
 
 html,
 body,
@@ -149,12 +162,11 @@ button {
 }
 .scroll::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.16);
-  border-radius: 99px;
   border: 2px solid transparent;
   background-clip: padding-box;
 }
 .scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.26);
+  background: rgba(255, 255, 255, 0.28);
   background-clip: padding-box;
 }
 
@@ -164,12 +176,15 @@ button {
 }
 
 /* ==========================================================================
-   Liquid glass — one material, three weights
+   Liquid glass — squared chrome
+   Square corners, a 1px lit edge, and one accent hairline. The material still
+   frosts and refracts the backdrop, but the geometry is instrument chrome
+   rather than a rounded card.
    ========================================================================= */
 .lg {
   position: relative;
   isolation: isolate;
-  border-radius: var(--lg-radius, 20px);
+  border-radius: 0;
   transition: box-shadow var(--dur) var(--ease);
 }
 
@@ -179,12 +194,12 @@ button {
 }
 .lg--e1 {
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.13),
     var(--sh-1);
 }
 .lg--e2 {
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
     var(--sh-2);
 }
 
@@ -215,13 +230,14 @@ button {
   inset: 0;
   border-radius: inherit;
   pointer-events: none;
-  border-top: 1px solid rgba(255, 255, 255, 0.26);
-  box-shadow: inset 0 -18px 28px -24px rgba(0, 0, 0, 0.7);
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: inset 0 -18px 28px -24px rgba(0, 0, 0, 0.82);
 }
 
 /* The shared edge: every pane in the system, on both screens, uses this one
-   rim. It is what makes the material read as a single thing rather than two
-   different looks. */
+   rim, plus a short accent tick on the top-left corner. That tick is the whole
+   "instrument" cue — it costs one pseudo-element and reads as calibrated
+   hardware rather than as a card. */
 .lg::after {
   content: "";
   position: absolute;
@@ -229,8 +245,19 @@ button {
   z-index: -1;
   border-radius: inherit;
   pointer-events: none;
-  border: 1px solid rgba(255, 255, 255, 0.13);
+  border: 1px solid var(--edge-soft);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+.lg::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  width: 22px;
+  height: 2px;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(90deg, var(--accent), rgba(111, 211, 255, 0));
 }
 
 .lg__content {
@@ -253,26 +280,30 @@ button {
    material keeps its body, edge and rim: the same family, legible, and none of
    the mush. The component sets --lg-backdrop: none and a lighter body itself,
    so nothing here relies on inheritance. */
+.lg--over::before {
+  /* nested cells do not need the corner tick: it would repeat dozens of times */
+  display: none;
+}
 .lg--over .lg__body::after {
-  border-top-color: rgba(255, 255, 255, 0.15);
+  border-top-color: rgba(255, 255, 255, 0.16);
   box-shadow: none;
 }
 .lg--over::after {
-  border-color: rgba(255, 255, 255, 0.1);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  border-color: var(--edge-soft);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.13);
 }
 
 /* --- solid: floating surfaces -------------------------------------------
    A dropdown, a modal and a toast must be read against whatever they cover.
-   They are opaque panes: same rim and radius, no frosting, so nothing behind
-   them can leak through as a hard-edged rectangle. */
+   They are opaque panes: same rim and square corner, no frosting, so nothing
+   behind them can leak through as a hard-edged rectangle. */
 .lg--solid .lg__body {
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
 .lg--solid .lg__body::after {
-  border-top-color: rgba(255, 255, 255, 0.12);
-  box-shadow: inset 0 12px 24px -20px rgba(0, 0, 0, 0.5);
+  border-top-color: rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 12px 24px -20px rgba(0, 0, 0, 0.6);
 }
 
 /* Hairline divider — structure, not decoration */
@@ -383,7 +414,6 @@ button {
 .dot {
   width: 6px;
   height: 6px;
-  border-radius: 99px;
   background: currentColor;
   flex: none;
 }
@@ -700,8 +730,10 @@ button {
   position: absolute;
   inset: 0;
   z-index: -1;
+  /* black-dominant, with the faintest pool of light at the top so the glass
+     panels have something to sit against instead of absolute void */
   background:
-    radial-gradient(120% 80% at 50% 0%, #171a20 0%, #101216 45%, #0a0b0e 100%);
+    radial-gradient(130% 70% at 50% 0%, #0d1118 0%, #070a0f 42%, #020304 100%);
 }
 .ws__middle {
   display: grid;
@@ -1215,29 +1247,37 @@ button {
   top: 50%;
   width: calc(560px * var(--model-scale, 1));
   height: calc(250px * var(--model-scale, 1));
-  border-radius: 4px;
-  border: 1px solid var(--hairline);
-  background: rgba(255, 255, 255, 0.018);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  /* on a near-black stage the plates are carried by their lit edges plus a
+     faint inner sheen; a filled slab would just read as a black rectangle */
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.012));
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.5);
   pointer-events: auto;
   transition:
     background var(--dur) var(--ease),
-    border-color var(--dur) var(--ease);
+    border-color var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease);
 }
 @media (hover: hover) {
   .model__floor:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.03));
   }
 }
-/* the selected storey is the one piece of emphasis in the model */
+/* the selected storey is the one piece of emphasis in the model: a lit edge */
 .model__floor--active {
-  background: rgba(255, 255, 255, 0.13);
-  border-color: rgba(255, 255, 255, 0.5);
+  border-color: var(--accent);
+  background: linear-gradient(160deg, rgba(111, 211, 255, 0.16), rgba(111, 211, 255, 0.035));
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(111, 211, 255, 0.3),
+    0 0 18px -4px var(--accent-dim);
 }
 .model__floor--warn {
-  border-color: rgba(224, 169, 81, 0.5);
+  border-color: var(--warn);
 }
 .model__floor--alert {
-  border-color: rgba(226, 104, 95, 0.6);
+  border-color: var(--alert);
+  box-shadow: 0 0 14px -4px rgba(226, 104, 95, 0.7);
 }
 
 /* screen-space floor legend: text inside a rotated preserve-3d ancestor comes
@@ -1293,7 +1333,6 @@ button {
 .floorlist__dot {
   width: 5px;
   height: 5px;
-  border-radius: 99px;
   background: currentColor;
 }
 
@@ -1327,8 +1366,8 @@ button {
   width: 8px;
   height: 8px;
   margin: -4px 0 0 -4px;
-  border-radius: 99px;
   background: var(--ink-2);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5);
 }
 .plan__node--warn {
   background: var(--warn);
@@ -1508,13 +1547,32 @@ button {
   color: var(--warn);
 }
 
-/* --- status bar: the console floor (one glass pane per cell) -------------- */
+/* --- status bar: the console floor ---------------------------------------
+   Two groups with an obvious seam, because they answer different questions:
+   the left eight are per-floor state, the four on the right are whole-building
+   totals. Same material, but the totals carry a 2px accent bar and a slightly
+   lighter body so the eye reads "different kind of number" instead of "the
+   same numbers again". */
 .statusbar {
   display: grid;
-  grid-template-columns: repeat(8, minmax(0, 1fr)) auto;
+  grid-template-columns: repeat(8, minmax(0, 1fr)) 20px repeat(4, minmax(104px, auto));
   gap: 6px;
   min-height: 0;
 }
+/* the seam itself: a single vertical highlight between the two groups */
+.statusbar__seam {
+  position: relative;
+  display: block;
+  align-self: stretch;
+}
+.statusbar__seam::before {
+  content: "";
+  position: absolute;
+  inset: 6px 50% 6px auto;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, var(--accent-dim) 22%, var(--accent-dim) 78%, transparent);
+}
+
 .stile,
 .total {
   min-width: 0;
@@ -1552,7 +1610,7 @@ button {
 .stile__name {
   font-family: var(--font-cn);
   font-size: 11.5px;
-  color: var(--ink-1);
+  color: var(--ink-0);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1587,7 +1645,7 @@ button {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-size: 11px;
-  color: var(--ink-1);
+  color: var(--ink-0);
 }
 .metric__v--ok {
   color: var(--ink-1);
@@ -1598,20 +1656,40 @@ button {
 .metric__v--alert {
   color: var(--alert);
 }
-/* the four whole-building figures sit in their own panes, slightly lighter */
+/* the four whole-building figures: same material, different kind of number */
 .total {
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: 1px;
-  padding: 8px 13px;
+  padding: 8px 13px 8px 15px;
+  --lg-body-alpha: 1.5;
+}
+/* a 2px accent bar marks these as building-wide aggregates, not a ninth floor */
+.total::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  bottom: -1px;
+  width: 2px;
+  z-index: 2;
+  pointer-events: none;
+  background: var(--accent-dim);
 }
 .total__k {
   font-size: 9.5px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--ink-4);
+  color: var(--accent);
+  opacity: 0.85;
   white-space: nowrap;
+}
+/* the aggregate label gets a prefix so it never reads as a repeat of a tile */
+.total__k::before {
+  content: "Σ ";
+  opacity: 0.6;
 }
 .total__v {
   font-family: var(--font-mono);

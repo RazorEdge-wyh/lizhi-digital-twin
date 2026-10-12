@@ -87,6 +87,11 @@ export function StatusBar({ sim, selectedFloor, onSelectFloor }: Props) {
         );
       })}
 
+      {/* the seam: per-floor state on the left, building-wide totals on the
+          right. Without a visible divider the two groups read as one run of
+          numbers, which is what made the bar look like it repeated itself. */}
+      <span className="statusbar__seam" aria-hidden="true" />
+
       {[
         {
           k: "全楼负荷",
