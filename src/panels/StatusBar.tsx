@@ -86,6 +86,7 @@ export function StatusBar({ sim, selectedFloor, onSelectFloor }: Props) {
             {sim.load.toFixed(1)}
             <i className="total__u">kW</i>
           </span>
+          <span className="total__note">{sim.load > 900 ? "峰值区间" : "平稳运行"}</span>
         </div>
         <div className="total">
           <span className="total__k">在场人数</span>
@@ -93,6 +94,7 @@ export function StatusBar({ sim, selectedFloor, onSelectFloor }: Props) {
             {occupied}
             <i className="total__u">/ {capacity}</i>
           </span>
+          <span className="total__note">{FLOORS.length} 层汇总</span>
         </div>
         <div className="total">
           <span className="total__k">点位在线</span>
@@ -101,7 +103,7 @@ export function StatusBar({ sim, selectedFloor, onSelectFloor }: Props) {
             <i className="total__u">%</i>
           </span>
           <span className="total__note">
-            {sim.online}/{sim.devices}
+            {sim.online}/{sim.devices} 端点
           </span>
         </div>
         <div className="total">
@@ -110,6 +112,7 @@ export function StatusBar({ sim, selectedFloor, onSelectFloor }: Props) {
             {Math.round(avgCo2)}
             <i className="total__u">ppm</i>
           </span>
+          <span className="total__note">{avgCo2 > 880 ? "需加强新风" : "新风充足"}</span>
         </div>
       </div>
     </LiquidGlass>

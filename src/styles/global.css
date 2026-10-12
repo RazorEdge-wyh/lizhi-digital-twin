@@ -91,6 +91,12 @@ body,
   height: 100%;
 }
 
+/* nothing in this UI scrolls sideways; a stray wide child must not create one */
+html,
+body {
+  overflow-x: hidden;
+}
+
 body {
   margin: 0;
   background: var(--bg);
@@ -369,7 +375,7 @@ button {
   position: absolute;
   inset: 0;
   display: grid;
-  place-items: center;
+  place-items: center start;
   overflow: hidden;
 }
 
@@ -429,110 +435,221 @@ button {
   }
 }
 
-/* A single graded scrim: enough to hold white type and keep the control
-   distinct from the lit entrance behind it, no more. One layer only, so the
-   footage is not washed out by stacked overlays. */
+/* Scrim weighted to the left, where the type sits, and much lighter on the
+   right so the footage is not washed out. One layer only. */
 .landing__scrim {
   position: absolute;
   inset: 0;
   background:
-    /* legibility pocket under the control, where the entrance glows brightest */
-    radial-gradient(46% 26% at 50% 56%, rgba(4, 6, 10, 0.62), rgba(4, 6, 10, 0) 72%),
-    radial-gradient(88% 78% at 50% 46%, rgba(4, 6, 10, 0.56), rgba(4, 6, 10, 0.2) 64%, rgba(4, 6, 10, 0.5) 100%),
+    linear-gradient(
+      96deg,
+      rgba(3, 6, 12, 0.88) 0%,
+      rgba(3, 7, 14, 0.6) 30%,
+      rgba(4, 8, 16, 0.08) 56%,
+      rgba(4, 8, 16, 0.04) 78%,
+      rgba(4, 8, 16, 0.4) 100%
+    ),
+    radial-gradient(74% 64% at 20% 48%, rgba(3, 6, 12, 0.72), rgba(3, 6, 12, 0) 74%),
     linear-gradient(
       180deg,
-      rgba(4, 6, 10, 0.62) 0%,
-      rgba(4, 6, 10, 0.12) 28%,
-      rgba(4, 6, 10, 0.18) 58%,
-      rgba(4, 6, 10, 0.74) 100%
+      rgba(4, 6, 10, 0.52) 0%,
+      rgba(4, 6, 10, 0.05) 26%,
+      rgba(4, 6, 10, 0.1) 62%,
+      rgba(3, 6, 12, 0.7) 100%
     );
 }
 
+/* --- landing: editorial column, left aligned ----------------------------- */
 .landing__content {
   position: relative;
   z-index: 1;
+  /* min() keeps the column inside the viewport once the left margin grows, and
+     box-sizing keeps the margin from creating horizontal overflow */
+  width: min(820px, calc(100vw - clamp(24px, 14vw, 280px)));
+  box-sizing: border-box;
+  margin-left: clamp(24px, 7vw, 140px);
   display: flex;
   flex-direction: column;
+  gap: clamp(16px, 2.4vh, 26px);
+}
+
+.eyebrow {
+  display: inline-flex;
   align-items: center;
-  gap: clamp(22px, 3.4vh, 38px);
-  padding: 24px;
-  padding-bottom: max(24px, env(safe-area-inset-bottom));
-  text-align: center;
-  /* exact vertical rhythm instead of the grid's optical centring */
-  transform: translateY(-6%);
+  gap: 12px;
+  font-size: 11px;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: rgba(198, 220, 240, 0.8);
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.7);
+}
+.eyebrow__rule {
+  width: clamp(26px, 3.4vw, 54px);
+  height: 1px;
+  flex: none;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0));
+}
+.eyebrow__cn {
+  font-family: var(--font-cn);
+  letter-spacing: 0.28em;
+  font-size: 12px;
+  color: rgba(224, 238, 250, 0.92);
+}
+.eyebrow__en {
+  color: rgba(180, 200, 220, 0.7);
 }
 
-/* Who the building is for: the two faculties that share it. Kept to one muted
-   line so the screen still reads as building + name + one choice. */
-.landing__subtitle {
+.hero {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 10px;
+}
+.hero__title {
   margin: 0;
-  max-width: 44ch;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 18px;
 }
-.landing__subtitle-cn {
+.hero__title-cn {
+  position: relative;
   font-family: var(--font-cn);
-  font-size: clamp(12px, 1.1vw, 14px);
-  letter-spacing: 0.16em;
-  color: rgba(236, 242, 250, 0.9);
-  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.62);
-  text-wrap: pretty;
-}
-.landing__subtitle-en {
-  font-size: clamp(9.5px, 0.72vw, 10.5px);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(200, 214, 232, 0.62);
-  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.62);
-  text-wrap: pretty;
-}
-
-.landing__title {
-  margin: 0;
-  font-family: var(--font-cn);
-  font-weight: 700;
-  font-size: clamp(58px, 9vw, 132px);
+  font-weight: 800;
+  font-size: clamp(46px, 7.4vw, 100px);
   line-height: 1;
-  letter-spacing: 0.08em;
-  /* near-white with the faintest vertical grade, plus an outline so the glyphs
-     hold their edge against the photograph */
-  background: linear-gradient(178deg, #ffffff 6%, #f2f5f9 42%, #dfe5ec 78%, #ffffff 100%);
+  letter-spacing: 0.06em;
+  /* near-white with a cool vertical grade — presence without neon */
+  background: linear-gradient(176deg, #ffffff 4%, #eef5fc 26%, #cfe1f2 56%, #ffffff 84%, #dbe8f5 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   -webkit-text-stroke: 0.5px rgba(255, 255, 255, 0.22);
-  filter: drop-shadow(0 2px 24px rgba(0, 0, 0, 0.5));
-  text-wrap: balance;
+  filter: drop-shadow(0 4px 28px rgba(0, 0, 0, 0.6));
+}
+/* the engineering rule under the Chinese title */
+.hero__title-cn::after {
+  content: "";
+  position: absolute;
+  left: 0.06em;
+  right: 34%;
+  bottom: -0.08em;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.85), rgba(150, 190, 225, 0.35) 46%, transparent);
+  opacity: 0.8;
+}
+.hero__title-en {
+  font-size: clamp(14px, 1.4vw, 20px);
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(228, 240, 252, 0.9);
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.72);
 }
 
-/* The one control. Light frosted glass: it has to stay legible over both the
-   lit facade and the dark sky, so the material brightens the backdrop rather
-   than glowing. */
+/* who the building is for */
+.hero__faculty {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  font-family: var(--font-cn);
+  font-size: clamp(12px, 1.05vw, 13.5px);
+  letter-spacing: 0.14em;
+  color: rgba(232, 240, 250, 0.9);
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.7);
+}
+.hero__faculty-en {
+  font-family: var(--font-ui);
+  font-size: clamp(9.5px, 0.7vw, 10.5px);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(190, 208, 228, 0.6);
+}
+
+.hero__lede {
+  max-width: 58ch;
+  margin: 2px 0 0;
+  font-family: var(--font-cn);
+  font-size: 13px;
+  line-height: 1.85;
+  color: rgba(206, 222, 238, 0.78);
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.72);
+  text-wrap: pretty;
+}
+.hero__lede-en {
+  display: block;
+  margin-top: 5px;
+  font-family: var(--font-ui);
+  font-size: 11.5px;
+  letter-spacing: 0.05em;
+  color: rgba(168, 190, 212, 0.64);
+}
+
+/* live figures — one pane of glass each, no gradient body */
+.specs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.spec {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 13px;
+  border-radius: 11px;
+  border: 1px solid var(--hairline);
+  background: rgba(255, 255, 255, 0.055);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  backdrop-filter: blur(14px) saturate(160%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+.spec svg {
+  color: var(--ink-3);
+}
+.spec__v {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 14px;
+  color: #fff;
+}
+.spec__k {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+/* --- the one control ----------------------------------------------------- */
+.startrow {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
 .enter {
   display: inline-flex;
   align-items: stretch;
   justify-content: center;
-  min-height: 62px;
+  min-height: 66px;
   padding: 0;
   border: none;
-  border-radius: 31px;
+  border-radius: 33px;
   background: transparent;
   color: var(--ink-0);
   transition: transform var(--dur-fast) var(--ease);
 }
-/* The pane is the flex item that carries the control's box: padding lives here
-   so the glass itself is the full size of the button, not sized to its label. */
+/* The pane carries the control's box: padding lives here so the glass is the
+   full size of the button rather than sizing to its label. */
 .enter .lg {
   flex: 1 1 auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 clamp(34px, 5vw, 58px);
-  border-radius: 31px;
+  border-radius: 33px;
 }
 /* A full-perimeter hairline reads as a surface edge rather than a glow, which
-   is what tells the eye this is a control and not part of the photograph. */
+   is what tells the eye this is a control and not part of the footage. */
 .enter .lg::after {
   content: "";
   position: absolute;
@@ -542,29 +659,49 @@ button {
   border: 1px solid rgba(255, 255, 255, 0.44);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
 }
+.enter__inner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 clamp(22px, 3vw, 30px);
+}
+.enter__glyph {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  color: #fff;
+}
 .enter__label {
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: 1px;
 }
 .enter__cn {
   font-family: var(--font-cn);
   font-size: clamp(19px, 1.7vw, 22px);
   font-weight: 600;
   letter-spacing: 0.2em;
-  text-indent: 0.2em;
   color: #fff;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
 }
 .enter__en {
   font-size: 10px;
-  letter-spacing: 0.26em;
-  text-indent: 0.26em;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.82);
+  color: rgba(255, 255, 255, 0.84);
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.42);
+}
+.enter__chev {
+  color: rgba(255, 255, 255, 0.78);
+  transition: transform var(--dur) var(--ease);
 }
 @media (hover: hover) {
   .enter:hover {
@@ -576,11 +713,57 @@ button {
       0 18px 40px -16px rgba(0, 0, 0, 0.72);
   }
   .enter:hover .lg::after {
-    border-color: rgba(255, 255, 255, 0.56);
+    border-color: rgba(255, 255, 255, 0.6);
+  }
+  .enter:hover .enter__chev {
+    transform: translateX(3px);
   }
 }
 .enter:active {
   transform: scale(0.96);
+}
+
+.startrow__hint {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--ink-3);
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.7);
+}
+.startrow__hint b {
+  color: var(--ink-0);
+  font-family: var(--font-cn);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+}
+
+/* --- footer -------------------------------------------------------------- */
+.landing__footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 16px clamp(20px, 3vw, 40px);
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(150, 172, 196, 0.66);
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.72);
+}
+.landing__coords {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: rgba(160, 184, 208, 0.7);
 }
 
 /* ==========================================================================
@@ -981,6 +1164,71 @@ button {
   border-top: 1px solid var(--hairline-soft);
   overflow: hidden;
   background: #0b0d11;
+}
+
+/* --- viewport chrome ------------------------------------------------------
+   A viewfinder frame plus an axis triad and a corner readout. This is what
+   makes the centre read as an engine viewport rather than an empty box; it is
+   deliberately just line work — no scan sweep, no glow, no vignette. */
+.viewport__hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.hud__corner {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+.hud__corner--tl {
+  top: 9px;
+  left: 9px;
+  border-right: none;
+  border-bottom: none;
+}
+.hud__corner--tr {
+  top: 9px;
+  right: 9px;
+  border-left: none;
+  border-bottom: none;
+}
+.hud__corner--bl {
+  bottom: 9px;
+  left: 9px;
+  border-right: none;
+  border-top: none;
+}
+.hud__corner--br {
+  bottom: 9px;
+  right: 9px;
+  border-left: none;
+  border-top: none;
+}
+.hud__readout {
+  position: absolute;
+  top: 12px;
+  left: 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 10.5px;
+  letter-spacing: 0.02em;
+  color: var(--ink-4);
+}
+.hud__readout b {
+  color: var(--ink-1);
+  font-weight: 500;
+}
+.hud__axis {
+  position: absolute;
+  right: 14px;
+  bottom: 12px;
+  width: 56px;
+  height: 56px;
+  color: var(--ink-3);
 }
 
 /* --- model (isometric floor plates) ------------------------------------- */
@@ -1664,10 +1912,97 @@ button {
     border-bottom: 1px solid var(--hairline-soft);
   }
 }
-@media (max-width: 860px) {
+@media (max-width: 700px) {
   .landing__content {
-    gap: 30px;
+    gap: 14px;
+    margin: 0 18px;
+    width: calc(100vw - 36px);
+    max-width: none;
+    padding-bottom: 64px;
   }
+  /* the display title and its English label stack instead of colliding */
+  .hero__title {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .hero__title-cn {
+    font-size: clamp(40px, 13vw, 60px);
+  }
+  .hero__title-en {
+    font-size: 11px;
+    letter-spacing: 0.26em;
+  }
+  .hero__lede {
+    font-size: 12px;
+    line-height: 1.7;
+  }
+  .hero__lede-en {
+    display: none;
+  }
+  .hero__faculty-en {
+    font-size: 9px;
+    line-height: 1.5;
+  }
+  /* the control takes the full width so its label never crowds the hint */
+  .startrow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .enter {
+    width: 100%;
+    min-height: 62px;
+  }
+  .enter__inner {
+    flex: 1 1 auto;
+    width: 100%;
+    /* centred so the glyph/label/chevron group sits as one unit */
+    justify-content: center;
+    gap: 12px;
+    padding: 0 14px;
+  }
+  .enter__label {
+    text-align: left;
+  }
+  .enter__chev {
+    flex: none;
+  }
+  .enter__cn {
+    font-size: 18px;
+    letter-spacing: 0.12em;
+  }
+  .startrow__hint {
+    font-size: 10px;
+  }
+  /* the footer is absolutely positioned, so it needs its own box-sizing guard */
+  .landing__footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 18px;
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: none;
+  }
+  .landing__scrim {
+    /* one vertical grade instead of the left-weighted one: on a phone the type
+       spans the full width, so it needs an even wash rather than a left ramp */
+    background:
+      radial-gradient(120% 70% at 50% 42%, rgba(3, 6, 12, 0.62), rgba(3, 6, 12, 0.2) 70%),
+      linear-gradient(
+        180deg,
+        rgba(3, 6, 12, 0.72) 0%,
+        rgba(3, 6, 12, 0.42) 34%,
+        rgba(3, 6, 12, 0.5) 70%,
+        rgba(3, 6, 12, 0.86) 100%
+      );
+  }
+}
+@media (max-width: 860px) {
   .ws__middle {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: 168px minmax(0, 1fr);

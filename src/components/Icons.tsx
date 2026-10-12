@@ -27,6 +27,37 @@ export const IconChevronRight = ({ size = 14, ...p }: IconProps) => (
   </svg>
 );
 
+export const IconArrowRight = ({ size = 14, ...p }: IconProps) => (
+  <svg {...base(size)} {...p}>
+    <path d="M4 12h15" />
+    <path d="M13 6l6 6-6 6" />
+  </svg>
+);
+
+export const IconWifi = ({ size = 14, ...p }: IconProps) => (
+  <svg {...base(size)} {...p}>
+    <path d="M2.5 9a15 15 0 0119 0" />
+    <path d="M6 12.5a10 10 0 0112 0" />
+    <path d="M9.5 16a5 5 0 015 0" />
+    <circle cx="12" cy="19.5" r="1" fill="currentColor" stroke="none" />
+  </svg>
+);
+
+export const IconPower = ({ size = 14, ...p }: IconProps) => (
+  <svg {...base(size)} {...p}>
+    <path d="M12 3v8" />
+    <path d="M6.8 6.5a8 8 0 1010.4 0" />
+  </svg>
+);
+
+export const IconUsers = ({ size = 14, ...p }: IconProps) => (
+  <svg {...base(size)} {...p}>
+    <circle cx="9" cy="8" r="3.2" />
+    <path d="M3 20a6 6 0 0112 0" />
+    <path d="M16 5.5a3 3 0 010 5.6M17.5 20a6 6 0 00-1.6-4.1" />
+  </svg>
+);
+
 export const IconPlus = ({ size = 14, ...p }: IconProps) => (
   <svg {...base(size)} {...p}>
     <path d="M12 5v14M5 12h14" />

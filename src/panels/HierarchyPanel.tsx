@@ -12,6 +12,8 @@ interface Props {
 
 const statusTone = (s?: string) =>
   s === "alert" ? "var(--alert)" : s === "warn" ? "var(--warn)" : "var(--ok)";
+/** feeds the `.tag--ok|warn|alert` modifiers */
+const statusKind = (s?: string) => (s === "alert" ? "alert" : s === "warn" ? "warn" : "ok");
 
 /**
  * Hierarchy tree: building → floor → functional zone → sensor group.
@@ -91,8 +93,8 @@ export function HierarchyPanel({ selectedFloor, onSelectFloor, expanded, onToggl
                         <span className="tree__en">{f.function}</span>
                       </span>
                       <span className="tree__meta">
-                        <span className="num" style={{ fontSize: 10.5, color: "var(--ink-3)" }}>
-                          {r ? `${r.temp.toFixed(1)}°` : "—"}
+                        <span className={`tag tag--${statusKind(r?.status)}`} style={{ height: 17, padding: "0 6px" }}>
+                          {r ? `${r.temp.toFixed(0)}°` : "—"}
                         </span>
                       </span>
                     </button>

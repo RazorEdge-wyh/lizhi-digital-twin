@@ -208,6 +208,53 @@ export function ViewportPanel({ selectedFloor, onSelectFloor, readings, view, on
             </table>
           </div>
         )}
+
+        {/* viewfinder chrome + orientation gizmo: this is what makes the centre
+            read as an editor viewport rather than an empty box. Four corner
+            ticks and an axis triad — no scan lines, no glow. */}
+        {view !== "data" && (
+          <div className="viewport__hud" aria-hidden="true">
+            <span className="hud__corner hud__corner--tl" />
+            <span className="hud__corner hud__corner--tr" />
+            <span className="hud__corner hud__corner--bl" />
+            <span className="hud__corner hud__corner--br" />
+
+            <div className="hud__readout">
+              <span>
+                FLOOR <b>{floor.code}</b> · {floor.label}
+              </span>
+              <span>
+                T <b>{reading ? reading.temp.toFixed(1) : "—"}°C</b> · RH{" "}
+                <b>{reading ? reading.rh.toFixed(0) : "—"}%</b> · CO₂ <b>{reading?.co2 ?? "—"} ppm</b>
+              </span>
+              <span>
+                OCC <b>{reading?.people ?? "—"}</b> · LOAD <b>{reading ? reading.power.toFixed(1) : "—"} kW</b>
+              </span>
+            </div>
+
+            <svg className="hud__axis" viewBox="0 0 60 60">
+              <g stroke="currentColor" strokeWidth="1.1" fill="none" opacity="0.66">
+                <path d="M14 46V18" />
+                <path d="M14 46h30" />
+                <path d="M14 46l-9 9" />
+                <path d="M14 18l-3 4M14 18l3 4" />
+                <path d="M44 46l-4-3M44 46l-4 3" />
+                <path d="M5 55l-3-3M5 55l3-3" />
+              </g>
+              <g fill="currentColor" fontSize="7" fontFamily="var(--font-mono)" opacity="0.8">
+                <text x="18" y="16">
+                  Z
+                </text>
+                <text x="46" y="42">
+                  Y
+                </text>
+                <text x="4" y="56">
+                  X
+                </text>
+              </g>
+            </svg>
+          </div>
+        )}
       </div>
     </LiquidGlass>
   );
