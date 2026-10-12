@@ -188,17 +188,22 @@ button {
     var(--sh-2);
 }
 
-/* The tint + backdrop blur live on one clipped layer so the refraction filter
-   always has a stable, non-scrolling surface to sample. */
+/* The body colour and the backdrop value are written inline by the component,
+   per element. They are deliberately NOT inherited custom properties: a
+   `--lg-*` override placed on an ancestor (a menu or modal, say) would cascade
+   into every nested pane and flatten them all to one tint — which is exactly
+   what broke the stacked glass in the console. */
 .lg__body {
   position: absolute;
   inset: 0;
   z-index: -2;
   border-radius: inherit;
   overflow: hidden;
-  background: var(--lg-wash, rgba(10, 14, 22, 0.22));
-  -webkit-backdrop-filter: var(--glass-backdrop);
-  backdrop-filter: var(--glass-backdrop);
+  /* color-mix lets a child brighten the material without redefining it, which
+     is how a selected tile is expressed (see .stile--on) */
+  background: color-mix(in srgb, var(--lg-body, rgba(10, 14, 22, 0.5)), white calc((var(--lg-body-alpha, 1) - 1) * 100%));
+  -webkit-backdrop-filter: var(--lg-backdrop);
+  backdrop-filter: var(--lg-backdrop);
   transform: translateZ(0);
 }
 
@@ -210,8 +215,22 @@ button {
   inset: 0;
   border-radius: inherit;
   pointer-events: none;
-  border-top: 1px solid rgba(255, 255, 255, 0.24);
+  border-top: 1px solid rgba(255, 255, 255, 0.26);
   box-shadow: inset 0 -18px 28px -24px rgba(0, 0, 0, 0.7);
+}
+
+/* The shared edge: every pane in the system, on both screens, uses this one
+   rim. It is what makes the material read as a single thing rather than two
+   different looks. */
+.lg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
 }
 
 .lg__content {
@@ -228,11 +247,32 @@ button {
   min-height: 0;
 }
 
-.lg__defs {
-  position: absolute;
-  width: 0;
-  height: 0;
-  pointer-events: none;
+/* --- over: glass stacked on glass ----------------------------------------
+   A nested `backdrop-filter` cannot sample what its parent already filtered, so
+   a frosted child turns muddy. On this tier the frosting is dropped and the
+   material keeps its body, edge and rim: the same family, legible, and none of
+   the mush. The component sets --lg-backdrop: none and a lighter body itself,
+   so nothing here relies on inheritance. */
+.lg--over .lg__body::after {
+  border-top-color: rgba(255, 255, 255, 0.15);
+  box-shadow: none;
+}
+.lg--over::after {
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+/* --- solid: floating surfaces -------------------------------------------
+   A dropdown, a modal and a toast must be read against whatever they cover.
+   They are opaque panes: same rim and radius, no frosting, so nothing behind
+   them can leak through as a hard-edged rectangle. */
+.lg--solid .lg__body {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.lg--solid .lg__body::after {
+  border-top-color: rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 12px 24px -20px rgba(0, 0, 0, 0.5);
 }
 
 /* Hairline divider — structure, not decoration */
@@ -255,7 +295,7 @@ button {
    material body, edge and rim are kept — visually identical family, still
    legible, none of the mush. */
 .lg--over .lg__body {
-  background: var(--lg-wash, rgba(255, 255, 255, 0.08));
+  background: var(--lg-body, rgba(255, 255, 255, 0.08));
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
@@ -760,8 +800,6 @@ button {
   min-width: 246px;
   padding: 5px;
   border-radius: 12px;
-  --lg-wash: rgba(14, 16, 20, 0.94);
-  --glass-backdrop: none;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.13),
     0 20px 44px -16px rgba(0, 0, 0, 0.8);
@@ -1162,8 +1200,11 @@ button {
   width: calc(700px * var(--model-scale, 1));
   height: calc(440px * var(--model-scale, 1));
   transform-style: preserve-3d;
-  /* at rotateX(60deg) the Z axis projects entirely onto screen Y */
-  transform: rotateX(62deg) rotateZ(-36deg);
+  /* At rotateX(60deg) the Z axis projects entirely onto screen Y (sin 60 = 1),
+     so the stack height comes from the camera pitch. The yaw is nudged off the
+     45deg diagonal so the plates read as a solid with a near side and a far
+     side rather than as a flat lozenge. */
+  transform: rotateX(62deg) rotateZ(-32deg);
   transition:
     width var(--dur-slow) var(--ease),
     height var(--dur-slow) var(--ease);
@@ -1499,7 +1540,8 @@ button {
   }
 }
 .stile--on {
-  --lg-wash: rgba(255, 255, 255, 0.18);
+  /* brightens the material instead of redefining it (see .lg__body color-mix) */
+  --lg-body-alpha: 2.1;
 }
 .stile__top {
   display: flex;
@@ -1616,8 +1658,6 @@ button {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  --lg-wash: rgba(16, 18, 22, 0.94);
-  --glass-backdrop: none;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.14),
     0 30px 70px -24px rgba(0, 0, 0, 0.85);
@@ -1757,8 +1797,6 @@ button {
   align-items: center;
   gap: 9px;
   max-width: 360px;
-  --lg-wash: rgba(14, 16, 20, 0.94);
-  --glass-backdrop: none;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.13),
     0 16px 36px -14px rgba(0, 0, 0, 0.8);

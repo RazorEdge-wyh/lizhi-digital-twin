@@ -272,7 +272,7 @@ export function MonitorPanel({ floorCode, floorLabel, reading, history, paused, 
   );
 
   return (
-    <LiquidGlass className="panel" radius="lg" tone="thick" refraction={0.7} blur={20} elevation={1} fill>
+    <LiquidGlass className="panel" radius="lg" variant="chrome" refraction={1} elevation={1} fill>
       <div className="panel__head">
         <span className="panel__title">
           <span className="panel__cn">监视器</span>
@@ -318,7 +318,7 @@ export function MonitorPanel({ floorCode, floorLabel, reading, history, paused, 
           { k: "负荷", v: reading ? reading.power.toFixed(1) : "—", warn: false },
           { k: "在线点位", v: `${reading?.online ?? 0}/${reading?.devices ?? 0}`, warn: false },
         ].map((s) => (
-          <LiquidGlass key={s.k} className="mstat" radius="sm" tone="regular" refraction={0} over elevation={0} fill>
+          <LiquidGlass key={s.k} className="mstat" radius="sm" variant="chrome" refraction={0} over elevation={0} fill>
             <span className="mstat__k">{s.k}</span>
             <span className={`mstat__v ${s.warn ? "mstat__v--warn" : ""}`}>{s.v}</span>
           </LiquidGlass>

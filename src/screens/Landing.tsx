@@ -26,6 +26,8 @@ export function Landing({ onExplore }: Props) {
           <span className="landing__kicker-sub">湖南科技大学 · 智能空间数字孪生</span>
         </p>
 
+        {/* deliberately plain type, no material: the one action must be
+            unambiguous, and the hover rule is the whole affordance */}
         <button className="startlink" type="button" onClick={onExplore}>
           <span className="startlink__text">开始探索</span>
           <span className="startlink__rule" aria-hidden="true" />

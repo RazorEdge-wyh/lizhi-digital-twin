@@ -45,7 +45,8 @@ interface MenuItem {
   disabled?: boolean;
 }
 
-/** Modal for 项目 → 新建 / 打开. */
+/** Modal for 项目 → 新建 / 打开. An opaque pane: it must be read against
+ *  whatever it covers, so it does not rely on backdrop sampling. */
 function ProjectModal({
   mode,
   onClose,
@@ -67,7 +68,7 @@ function ProjectModal({
 
   return (
     <div className="modal" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <LiquidGlass className="modal__card" radius="xl" tone="thick" refraction={1} blur={20} elevation={2} fill>
+      <LiquidGlass className="modal__card" radius="xl" variant="chrome" refraction={0} solid elevation={2} fill>
         <div className="modal__title">
           <span className="modal__title-cn">{mode === "new" ? "新建项目" : "打开项目"}</span>
           <span className="modal__title-en">{mode === "new" ? "New Project" : "Open Project"}</span>
@@ -325,7 +326,7 @@ export function Workspace({ onExit, active }: Props) {
       <div className="ws__bg" aria-hidden="true" />
 
       {/* ---- menu bar ---------------------------------------------------- */}
-      <LiquidGlass className="menubar" radius="lg" tone="thick" refraction={0.7} blur={20} elevation={1}>
+      <LiquidGlass className="menubar" radius="lg" variant="chrome" refraction={1} elevation={1}>
         <span className="menubar__left">
           <span className="menubar__name">
             <span className="menubar__name-cn">立志楼</span>
@@ -344,7 +345,7 @@ export function Workspace({ onExit, active }: Props) {
                   {label}
                 </button>
                 {openMenu === label && (
-                  <LiquidGlass className="menu" radius="md" tone="thick" refraction={0} elevation={2}>
+                  <LiquidGlass className="menu" radius="md" variant="chrome" refraction={0} solid elevation={2}>
                     <div className="menu__list" role="menu">
                       {items.map((item, i) => (
                         <button
@@ -374,7 +375,7 @@ export function Workspace({ onExit, active }: Props) {
         </span>
 
         <span className="menubar__center">
-          <LiquidGlass className="menubar__pill" radius="sm" tone="regular" refraction={0} over elevation={0}>
+          <LiquidGlass className="menubar__pill" radius="sm" variant="chrome" refraction={0} over elevation={0}>
             <span className="menubar__doc">
               <span className="menubar__doc-name">{projectName}</span>
               <span className="menubar__doc-path" translate="no">
@@ -383,20 +384,20 @@ export function Workspace({ onExit, active }: Props) {
             </span>
           </LiquidGlass>
 
-          <LiquidGlass className="menubar__pill" radius="sm" tone="regular" refraction={0} over elevation={0}>
+          <LiquidGlass className="menubar__pill" radius="sm" variant="chrome" refraction={0} over elevation={0}>
             <span className="tag" title="上次保存时间">
               保存 {savedAt}
             </span>
             {sim.alerts > 0 && (
               <span className="tag tag--alert">
-                <i className="dot" /> {sim.alerts}
+                <i className="dot" /> {sim.alerts} 报警
               </span>
             )}
           </LiquidGlass>
         </span>
 
         <span className="menubar__right">
-          <LiquidGlass className="menubar__actions" radius="sm" tone="regular" refraction={0} over elevation={0}>
+          <LiquidGlass className="menubar__actions" radius="sm" variant="chrome" refraction={0} over elevation={0}>
             <button
               className={`tbtn ${paused ? "tbtn--on" : ""}`}
               onClick={() => setPaused((v) => !v)}
@@ -454,7 +455,7 @@ export function Workspace({ onExit, active }: Props) {
       {/* ---- toasts ------------------------------------------------------ */}
       <div className="toasts" role="status" aria-live="polite">
         {toasts.map((t) => (
-          <LiquidGlass key={t.id} className="toast" radius="md" tone="thick" refraction={0} elevation={1}>
+          <LiquidGlass key={t.id} className="toast" radius="md" variant="chrome" refraction={0} solid elevation={1}>
             <i className="dot" style={{ color: t.tone === "warn" ? "var(--warn)" : "var(--ok)" }} />
             <span className="toast__cn">{t.cn}</span>
             <span className="toast__en">{t.en}</span>

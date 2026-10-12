@@ -25,7 +25,7 @@ export function HierarchyPanel({ selectedFloor, onSelectFloor, expanded, onToggl
   const floor = FLOORS.find((f) => f.id === selectedFloor) ?? FLOORS[0];
 
   return (
-    <LiquidGlass className="panel" radius="lg" tone="thick" refraction={0.7} blur={20} elevation={1} fill>
+    <LiquidGlass className="panel" radius="lg" variant="chrome" refraction={1} elevation={1} fill>
       <div className="panel__head">
         <span className="panel__title">
           <span className="panel__cn">层级</span>
@@ -158,7 +158,7 @@ export function HierarchyPanel({ selectedFloor, onSelectFloor, expanded, onToggl
         </div>
         <div className="readout__cells">
           {DEVICE_TYPES.slice(0, 3).map((d) => (
-            <LiquidGlass key={d.id} className="rcell" radius="sm" tone="regular" refraction={0} over elevation={0} fill>
+            <LiquidGlass key={d.id} className="rcell" radius="sm" variant="chrome" refraction={0} over elevation={0} fill>
               <span className="rcell__k">{d.cn}</span>
               <span className="rcell__v">
                 {reading ? Number(reading[d.source]).toFixed(d.id === "people" ? 0 : 1) : "—"}

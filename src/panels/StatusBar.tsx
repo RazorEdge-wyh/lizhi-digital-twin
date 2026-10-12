@@ -35,7 +35,7 @@ export function StatusBar({ sim, selectedFloor, onSelectFloor }: Props) {
             key={f.id}
             className={`stile ${on ? "stile--on" : ""}`}
             radius="md"
-            tone="regular"
+            variant="chrome"
             refraction={0}
             over
             elevation={0}
@@ -108,7 +108,7 @@ export function StatusBar({ sim, selectedFloor, onSelectFloor }: Props) {
           note: avgCo2 > 880 ? "需加强新风" : "新风充足",
         },
       ].map((t) => (
-        <LiquidGlass key={t.k} className="total" radius="md" tone="thin" refraction={0} over elevation={0} fill>
+        <LiquidGlass key={t.k} className="total" radius="md" variant="chrome" refraction={0} over elevation={0} fill>
           <span className="total__k">{t.k}</span>
           <span className="total__v">
             {t.v}

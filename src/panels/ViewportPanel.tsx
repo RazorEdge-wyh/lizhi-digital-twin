@@ -55,7 +55,7 @@ export function ViewportPanel({ selectedFloor, onSelectFloor, readings, view, on
   const reading = readings[selectedFloor];
 
   return (
-    <LiquidGlass className="viewport" radius="lg" tone="thick" refraction={0.7} blur={18} elevation={1} fill>
+    <LiquidGlass className="viewport" radius="lg" variant="chrome" refraction={1} elevation={1} fill>
       <div className="viewport__bar">
         <div className="viewport__tabs">
           <button className={`tab ${view === "model" ? "tab--on" : ""}`} onClick={() => onView("model")}>
